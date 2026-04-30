@@ -1,6 +1,8 @@
 package com.solydshop.ecommerce.service;
 
+import com.solydshop.ecommerce.entity.Category;
 import com.solydshop.ecommerce.payload.request.CategoryRequest;
+import com.solydshop.ecommerce.payload.response.CategoryDTO;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 
 public interface CategoryService {
@@ -13,4 +15,6 @@ public interface CategoryService {
     );
 
     CategoryResponse createCategory(CategoryRequest request);
+    CategoryDTO getCategoryById(Long categoryId);
+    void deleteCategory(Long categoryId);
 }

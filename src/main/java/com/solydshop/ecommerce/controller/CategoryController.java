@@ -1,6 +1,8 @@
 package com.solydshop.ecommerce.controller;
 
+import com.solydshop.ecommerce.entity.Category;
 import com.solydshop.ecommerce.payload.request.CategoryRequest;
+import com.solydshop.ecommerce.payload.response.CategoryDTO;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 import com.solydshop.ecommerce.service.CategoryService;
 
@@ -41,5 +43,19 @@ public class CategoryController {
     ) {
         CategoryResponse response = categoryService.createCategory(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/public/categories/{id}")
+    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
+        CategoryDTO category = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
+    }
+
+    @DeleteMapping("/admin/categories/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+
+        categoryService.deleteCategory(id);
+
+        return ResponseEntity.ok("Category deleted successfully");
     }
 }

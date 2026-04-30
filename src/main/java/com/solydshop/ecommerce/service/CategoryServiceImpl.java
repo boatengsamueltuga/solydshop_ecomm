@@ -2,9 +2,9 @@ package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.entity.Category;
 import com.solydshop.ecommerce.payload.request.CategoryRequest;
+import com.solydshop.ecommerce.payload.response.CategoryDTO;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 import com.solydshop.ecommerce.repository.CategoryRepository;
-import com.solydshop.ecommerce.service.CategoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -22,6 +22,16 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Converts a Category entity to a CategoryDTO
+     */
+    private CategoryDTO mapToDTO(Category category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setCategoryId(category.getCategoryId());
+        dto.setCategoryName(category.getCategoryName());
+        return dto;
+    }
+
     @Override
     public CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
@@ -35,8 +45,13 @@ public class CategoryServiceImpl implements CategoryService {
 
         List<Category> categories = pageCategories.getContent();
 
+        // Convert entities to DTOs
+        List<CategoryDTO> categoryDTOs = categories.stream()
+                .map(this::mapToDTO)
+                .toList();
+
         CategoryResponse response = new CategoryResponse();
-        response.setContent(categories);
+        response.setContent(categoryDTOs);
         response.setPageNumber(pageCategories.getNumber());
         response.setPageSize(pageCategories.getSize());
         response.setTotalElements(pageCategories.getTotalElements());
@@ -60,5 +75,23 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
 
         return getAllCategories(0, 5, "categoryId", "asc");
+    }
+
+    @Override
+    public CategoryDTO getCategoryById(Long categoryId) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+
+        return mapToDTO(category);
+    }
+
+    @Override
+    public void deleteCategory(Long categoryId) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+
+        categoryRepository.delete(category);
     }
 }
