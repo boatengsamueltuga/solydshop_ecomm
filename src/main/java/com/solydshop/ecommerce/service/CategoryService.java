@@ -1,5 +1,6 @@
 package com.solydshop.ecommerce.service;
 
+import com.solydshop.ecommerce.payload.request.CategoryRequest;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 
 public interface CategoryService {
@@ -10,4 +11,6 @@ public interface CategoryService {
             String sortBy,
             String sortOrder
     );
+
+    CategoryResponse createCategory(CategoryRequest request);
 }

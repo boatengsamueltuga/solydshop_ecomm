@@ -1,6 +1,7 @@
-package com.solydshop.ecommerce.service.impl;
+package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.entity.Category;
+import com.solydshop.ecommerce.payload.request.CategoryRequest;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 import com.solydshop.ecommerce.repository.CategoryRepository;
 import com.solydshop.ecommerce.service.CategoryService;
@@ -43,5 +44,21 @@ public class CategoryServiceImpl implements CategoryService {
         response.setLastPage(pageCategories.isLast());
 
         return response;
+    }
+
+    @Override
+    public CategoryResponse createCategory(CategoryRequest request) {
+
+        categoryRepository.findByCategoryName(request.getCategoryName())
+                .ifPresent(c -> {
+                    throw new RuntimeException("Category already exists");
+                });
+
+        Category category = new Category();
+        category.setCategoryName(request.getCategoryName());
+
+        categoryRepository.save(category);
+
+        return getAllCategories(0, 5, "categoryId", "asc");
     }
 }
