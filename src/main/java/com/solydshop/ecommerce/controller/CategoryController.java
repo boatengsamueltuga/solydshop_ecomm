@@ -1,8 +1,10 @@
 package com.solydshop.ecommerce.controller;
 
+import com.solydshop.ecommerce.payload.request.CategoryRequest;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
 import com.solydshop.ecommerce.service.CategoryService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,14 @@ public class CategoryController {
                 pageNumber, pageSize, sortBy, sortOrder
         );
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/admin/categories")
+    public ResponseEntity<CategoryResponse> createCategory(
+            @Valid @RequestBody CategoryRequest request
+    ) {
+        CategoryResponse response = categoryService.createCategory(request);
         return ResponseEntity.ok(response);
     }
 }
