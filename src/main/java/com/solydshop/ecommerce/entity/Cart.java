@@ -1,6 +1,7 @@
 package com.solydshop.ecommerce.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,21 +12,29 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    // Needed for findByUserId
+    private Long userId;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
-    private List<CartItem> cartItems;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> cartItems = new ArrayList<>();
 
-    public Cart() {}
+    public Long getCartId() {
+        return cartId;
+    }
 
-    public Long getCartId() { return cartId; }
-    public void setCartId(Long cartId) { this.cartId = cartId; }
+    public Long getUserId() {
+        return userId;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-    public List<CartItem> getCartItems() { return cartItems; }
-    public void setCartItems(List<CartItem> cartItems) { this.cartItems = cartItems; }
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
+    }
 }

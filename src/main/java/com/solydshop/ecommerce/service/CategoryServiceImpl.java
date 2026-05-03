@@ -1,6 +1,7 @@
 package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.entity.Category;
+import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.request.CategoryRequest;
 import com.solydshop.ecommerce.payload.response.CategoryDTO;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
@@ -22,9 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    /**
-     * Converts a Category entity to a CategoryDTO
-     */
     private CategoryDTO mapToDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setCategoryId(category.getCategoryId());
@@ -45,7 +43,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         List<Category> categories = pageCategories.getContent();
 
-        // Convert entities to DTOs
         List<CategoryDTO> categoryDTOs = categories.stream()
                 .map(this::mapToDTO)
                 .toList();
@@ -81,7 +78,9 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO getCategoryById(Long categoryId) {
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Category not found with id: " + categoryId)
+                );
 
         return mapToDTO(category);
     }
@@ -90,7 +89,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long categoryId) {
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Category not found with id: " + categoryId)
+                );
 
         categoryRepository.delete(category);
     }

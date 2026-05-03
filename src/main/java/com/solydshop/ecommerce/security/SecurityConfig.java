@@ -18,6 +18,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
+                        .requestMatchers("/api/cart/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

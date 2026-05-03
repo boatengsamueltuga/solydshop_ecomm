@@ -4,6 +4,8 @@ import com.solydshop.ecommerce.entity.Category;
 import com.solydshop.ecommerce.payload.request.CategoryRequest;
 import com.solydshop.ecommerce.payload.response.CategoryDTO;
 import com.solydshop.ecommerce.payload.response.CategoryResponse;
+import com.solydshop.ecommerce.payload.response.ProductDTO;
+import com.solydshop.ecommerce.payload.response.ProductResponse;
 import com.solydshop.ecommerce.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -58,4 +60,5 @@ public class CategoryController {
 
         return ResponseEntity.ok("Category deleted successfully");
     }
+
 }
