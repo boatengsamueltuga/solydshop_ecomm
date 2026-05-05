@@ -41,9 +41,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUser(user);
 
-        // ===== ADD THIS LINE =====
+
         order.setStatus(OrderStatus.PENDING);
-        // ==========================
+
 
         double total = 0;
 
@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
-    // ===== ADD THIS METHOD =====
+
     @Override
     public OrderDTO updateOrderStatus(Long orderId, String status) {
 
@@ -95,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
 
         return mapToDTO(order);
     }
-    // ===========================
+
 
     private OrderDTO mapToDTO(Order order) {
 
@@ -103,9 +103,9 @@ public class OrderServiceImpl implements OrderService {
         dto.setOrderId(order.getOrderId());
         dto.setTotalAmount(order.getTotalAmount());
 
-        // ===== ADD THIS LINE =====
+
         dto.setStatus(order.getStatus().name());
-        // ==========================
+
 
         List<CartItemDTO> items = order.getOrderItems()
                 .stream()
