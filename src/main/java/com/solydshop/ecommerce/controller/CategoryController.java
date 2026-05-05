@@ -7,6 +7,7 @@ import com.solydshop.ecommerce.payload.response.CategoryResponse;
 import com.solydshop.ecommerce.payload.response.ProductDTO;
 import com.solydshop.ecommerce.payload.response.ProductResponse;
 import com.solydshop.ecommerce.service.CategoryService;
+import com.solydshop.ecommerce.util.AppConstants;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,11 @@ public class CategoryController {
 
     @GetMapping("/public/categories")
     public ResponseEntity<CategoryResponse> getAllCategories(
-            @RequestParam(defaultValue = "0") Integer pageNumber,
-            @RequestParam(defaultValue = "5") Integer pageSize,
-            @RequestParam(defaultValue = "categoryId") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortOrder
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE) Integer pageSize,
+            @RequestParam(defaultValue = AppConstants.SORT_CATEGORIES_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.SORT_CATEGORIES_DIR) String sortOrder
+
     ) {
 
         CategoryResponse response = categoryService.getAllCategories(
