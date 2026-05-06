@@ -2,18 +2,22 @@ package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.entity.Category;
 import com.solydshop.ecommerce.entity.Product;
-import com.solydshop.ecommerce.exception.ResourceNotFoundException; // ✅ added
+import com.solydshop.ecommerce.entity.User;
+import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.request.ProductRequest;
 import com.solydshop.ecommerce.payload.response.ProductDTO;
 import com.solydshop.ecommerce.payload.response.ProductResponse;
 import com.solydshop.ecommerce.repository.CategoryRepository;
 import com.solydshop.ecommerce.repository.ProductRepository;
+import com.solydshop.ecommerce.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +27,15 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
-                              CategoryRepository categoryRepository) {
+                              CategoryRepository categoryRepository,
+                              UserRepository userRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
     private ProductDTO mapToDTO(Product product) {
@@ -42,6 +49,13 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
     @Override
     public ProductDTO createProduct(ProductRequest request) {
 
@@ -50,12 +64,15 @@ public class ProductServiceImpl implements ProductService {
                         new ResourceNotFoundException("Category not found with id: " + request.getCategoryId())
                 );
 
+        User seller = getCurrentUser();
+
         Product product = new Product();
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
+        product.setSeller(seller);
 
         productRepository.save(product);
 
@@ -108,6 +125,12 @@ public class ProductServiceImpl implements ProductService {
                         new ResourceNotFoundException("Product not found with id: " + productId)
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!product.getSeller().getUserId().equals(currentUser.getUserId())) {
+            throw new RuntimeException("You are not authorized to delete this product");
+        }
+
         productRepository.delete(product);
     }
 
@@ -118,6 +141,12 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product not found with id: " + productId)
                 );
+
+        User currentUser = getCurrentUser();
+
+        if (!product.getSeller().getUserId().equals(currentUser.getUserId())) {
+            throw new RuntimeException("You are not authorized to update this product");
+        }
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() ->
@@ -133,5 +162,34 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         return mapToDTO(product);
+    }
+
+    @Override
+    public ProductResponse getProductsForCurrentSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+
+        User currentUser = getCurrentUser();
+
+        Sort sort = sortOrder.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Product> pageProducts = productRepository.findBySellerUserId(currentUser.getUserId(), pageable);
+
+        List<ProductDTO> productDTOs = pageProducts.getContent()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        ProductResponse response = new ProductResponse();
+        response.setContent(productDTOs);
+        response.setPageNumber(pageProducts.getNumber());
+        response.setPageSize(pageProducts.getSize());
+        response.setTotalElements(pageProducts.getTotalElements());
+        response.setTotalPages(pageProducts.getTotalPages());
+        response.setLastPage(pageProducts.isLast());
+
+        return response;
     }
 }

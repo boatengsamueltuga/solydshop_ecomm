@@ -31,6 +31,15 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
+    @PostMapping("/seller/products")
+    public ResponseEntity<ProductDTO> createProductAsSeller(
+            @Valid @RequestBody ProductRequest request) {
+
+        ProductDTO dto = productService.createProduct(request);
+
+        return ResponseEntity.ok(dto);
+    }
+
     @GetMapping("/public/products")
     public ResponseEntity<ProductResponse> getAllProducts(
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) Integer pageNumber,
@@ -54,6 +63,12 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/seller/products/{id}")
+    public ResponseEntity<Void> deleteProductAsSeller(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/admin/products/{id}")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
@@ -61,5 +76,27 @@ public class ProductController {
     ) {
         ProductDTO dto = productService.updateProduct(id, request);
         return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/seller/products/{id}")
+    public ResponseEntity<ProductDTO> updateProductAsSeller(
+            @PathVariable Long id,
+            @RequestBody ProductRequest request
+    ) {
+        ProductDTO dto = productService.updateProduct(id, request);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/seller/products")
+    public ResponseEntity<ProductResponse> getSellerProducts(
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE) Integer pageSize,
+            @RequestParam(defaultValue = AppConstants.SORT_PRODUCTS_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.SORT_PRODUCTS_DIR) String sortOrder
+    ) {
+        ProductResponse response = productService.getProductsForCurrentSeller(
+                pageNumber, pageSize, sortBy, sortOrder
+        );
+        return ResponseEntity.ok(response);
     }
 }
