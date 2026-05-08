@@ -55,7 +55,16 @@ public class ProductServiceImpl implements ProductService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
-
+//   private User getCurrentUser() {
+//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//    System.out.println("AUTH USER: " + authentication.getName());
+//
+//    String email = authentication.getName();
+//
+//    return userRepository.findByEmail(email)
+//            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+//    }
     @Override
     public ProductDTO createProduct(ProductRequest request) {
 
@@ -192,4 +201,6 @@ public class ProductServiceImpl implements ProductService {
 
         return response;
     }
+
+
 }

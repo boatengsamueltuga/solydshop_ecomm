@@ -27,14 +27,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
 
-        authenticationManager.authenticate(
+        var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
 
-        String token = jwtUtil.generateToken(request.getEmail());
+        var userDetails = (org.springframework.security.core.userdetails.UserDetails)
+                authentication.getPrincipal();
+
+        String token = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthResponse(token));
     }
