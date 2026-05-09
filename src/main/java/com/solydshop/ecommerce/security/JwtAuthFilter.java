@@ -32,17 +32,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = null;
         String username = null;
+        Long userId = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
             token = authHeader.substring(7);
+
             username = jwtUtil.extractUsername(token);
+            userId = jwtUtil.extractUserId(token);
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (userId != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
             if (jwtUtil.validateToken(token, username)) {
 
-                // Extract roles directly from token
                 List<String> roles = jwtUtil.extractRoles(token);
 
                 var authorities = roles.stream()
@@ -50,13 +54,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .collect(Collectors.toList());
 
                 UsernamePasswordAuthenticationToken authToken =
+//                        new UsernamePasswordAuthenticationToken(
+//                                userId,
+//                                null,
+//                                authorities
+//                        );
                         new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
+                                username, // keeping username for Spring Security
+                                userId,   // storing userId in credentials
                                 authorities
                         );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authToken);
             }
         }
 

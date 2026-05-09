@@ -40,6 +40,12 @@ public class JwtUtil {
                         .toList()
         );
 
+        claims.put("userId",
+                ((com.solydshop.ecommerce.security.CustomUserDetails) userDetails)
+                        .getUser()
+                        .getUserId()
+        );
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
@@ -55,6 +61,10 @@ public class JwtUtil {
 
     public List<String> extractRoles(String token) {
         return getClaims(token).get("roles", List.class);
+    }
+
+    public Long extractUserId(String token) {
+        return ((Number) getClaims(token).get("userId")).longValue();
     }
 
     public boolean validateToken(String token, String username) {

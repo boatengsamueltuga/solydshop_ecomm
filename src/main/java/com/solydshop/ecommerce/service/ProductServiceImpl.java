@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,22 +50,13 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
-    private User getCurrentUser() {
+    // NEW METHOD (uses JWT userId from credentials)
+    private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return (Long) authentication.getCredentials();
     }
-//   private User getCurrentUser() {
-//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//    System.out.println("AUTH USER: " + authentication.getName());
-//
-//    String email = authentication.getName();
-//
-//    return userRepository.findByEmail(email)
-//            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-//    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Override
     public ProductDTO createProduct(ProductRequest request) {
 
@@ -73,7 +65,10 @@ public class ProductServiceImpl implements ProductService {
                         new ResourceNotFoundException("Category not found with id: " + request.getCategoryId())
                 );
 
-        User seller = getCurrentUser();
+        Long userId = getCurrentUserId();
+
+        User seller = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Product product = new Product();
         product.setProductName(request.getProductName());
@@ -126,6 +121,7 @@ public class ProductServiceImpl implements ProductService {
         return mapToDTO(product);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Override
     public void deleteProduct(Long productId) {
 
@@ -134,15 +130,15 @@ public class ProductServiceImpl implements ProductService {
                         new ResourceNotFoundException("Product not found with id: " + productId)
                 );
 
-        User currentUser = getCurrentUser();
+        Long userId = getCurrentUserId();
 
-        if (!product.getSeller().getUserId().equals(currentUser.getUserId())) {
+        if (!product.getSeller().getUserId().equals(userId)) {
             throw new RuntimeException("You are not authorized to delete this product");
         }
 
         productRepository.delete(product);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Override
     public ProductDTO updateProduct(Long productId, ProductRequest request) {
 
@@ -151,9 +147,9 @@ public class ProductServiceImpl implements ProductService {
                         new ResourceNotFoundException("Product not found with id: " + productId)
                 );
 
-        User currentUser = getCurrentUser();
+        Long userId = getCurrentUserId();
 
-        if (!product.getSeller().getUserId().equals(currentUser.getUserId())) {
+        if (!product.getSeller().getUserId().equals(userId)) {
             throw new RuntimeException("You are not authorized to update this product");
         }
 
@@ -173,10 +169,11 @@ public class ProductServiceImpl implements ProductService {
         return mapToDTO(product);
     }
 
+    @PreAuthorize("hasRole('SELLER')")
     @Override
     public ProductResponse getProductsForCurrentSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
-        User currentUser = getCurrentUser();
+        Long userId = getCurrentUserId();
 
         Sort sort = sortOrder.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
@@ -184,7 +181,7 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Product> pageProducts = productRepository.findBySellerUserId(currentUser.getUserId(), pageable);
+        Page<Product> pageProducts = productRepository.findBySellerUserId(userId, pageable);
 
         List<ProductDTO> productDTOs = pageProducts.getContent()
                 .stream()
@@ -201,6 +198,4 @@ public class ProductServiceImpl implements ProductService {
 
         return response;
     }
-
-
 }
