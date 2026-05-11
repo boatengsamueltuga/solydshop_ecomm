@@ -8,12 +8,17 @@ INSERT INTO ROLES (ROLE_ID, ROLE_NAME) VALUES (3, 'ROLE_SELLER');
 -- =========================
 -- USERS (password = 1234 encoded)
 -- =========================
-INSERT INTO USERS (USER_ID, EMAIL, NAME, PASSWORD) VALUES
-(1, 'admin@mail.com', 'Admin User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
-(2, 'seller1@mail.com', 'Seller One', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
-(3, 'seller2@mail.com', 'Seller Two', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
-(4, 'user@mail.com', 'Normal User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS');
+--INSERT INTO USERS (USER_ID, EMAIL, NAME, PASSWORD) VALUES
+--(1, 'admin@mail.com', 'Admin User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+--(2, 'seller1@mail.com', 'Seller One', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+--(3, 'seller2@mail.com', 'Seller Two', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+--(4, 'user@mail.com', 'Normal User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS');
 
+INSERT INTO USERS (EMAIL, NAME, PASSWORD) VALUES
+('admin@mail.com', 'Admin User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+('seller1@mail.com', 'Seller One', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+('seller2@mail.com', 'Seller Two', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'),
+('user@mail.com', 'Normal User', '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS');
 -- =========================
 -- USER ROLES
 -- =========================

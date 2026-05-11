@@ -1,7 +1,11 @@
 package com.solydshop.ecommerce.controller;
 
+import com.solydshop.ecommerce.entity.Role;
 import com.solydshop.ecommerce.payload.request.AuthRequest;
+import com.solydshop.ecommerce.payload.request.RegisterRequest;
 import com.solydshop.ecommerce.payload.response.AuthResponse;
+import com.solydshop.ecommerce.repository.RoleRepository;
+import com.solydshop.ecommerce.repository.UserRepository;
 import com.solydshop.ecommerce.security.JwtCookieUtil;
 import com.solydshop.ecommerce.security.JwtUtil;
 
@@ -15,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.solydshop.ecommerce.payload.request.RefreshTokenRequest;
 import com.solydshop.ecommerce.service.RefreshTokenService;
@@ -23,12 +28,24 @@ import com.solydshop.ecommerce.entity.User;
 import com.solydshop.ecommerce.security.CustomUserDetails;
 import com.solydshop.ecommerce.repository.RefreshTokenRepository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private RefreshTokenService refreshTokenService;
     @Autowired
@@ -202,5 +219,37 @@ public class AuthController {
         jwtCookieUtil.clearCookies(response);
 
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(
+            @RequestBody RegisterRequest request
+    ) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Email already exists");
+        }
+
+        User user = new User();
+
+        user.setName(request.getName());
+
+        user.setEmail(request.getEmail());
+
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        Role userRole = roleRepository
+                .findByRoleName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        user.setRoles(Set.of(userRole));
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully");
     }
 }
