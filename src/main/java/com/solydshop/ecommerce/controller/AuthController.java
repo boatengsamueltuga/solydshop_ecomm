@@ -2,9 +2,13 @@ package com.solydshop.ecommerce.controller;
 
 import com.solydshop.ecommerce.payload.request.AuthRequest;
 import com.solydshop.ecommerce.payload.response.AuthResponse;
+import com.solydshop.ecommerce.security.JwtCookieUtil;
 import com.solydshop.ecommerce.security.JwtUtil;
 
 //import jakarta.transaction.Transactional;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,14 +35,41 @@ public class AuthController {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
+    private JwtCookieUtil jwtCookieUtil;
+    @Autowired
     public AuthController(AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
 
+    //This code is for setting tokens
+//    @PostMapping("/login")
+//    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+//
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        request.getEmail(),
+//                        request.getPassword()
+//                )
+//        );
+//
+//        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+//
+//        String accessToken = jwtUtil.generateToken(userDetails);
+//
+//        RefreshToken refreshToken = refreshTokenService.createRefreshToken(
+//                userDetails.getUser().getUserId()
+//        );
+//
+//        return ResponseEntity.ok(
+//                new AuthResponse(accessToken, refreshToken.getToken())
+//        );
+//    }
+
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<String> login(@RequestBody AuthRequest request,
+                                        HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -55,9 +86,11 @@ public class AuthController {
                 userDetails.getUser().getUserId()
         );
 
-        return ResponseEntity.ok(
-                new AuthResponse(accessToken, refreshToken.getToken())
-        );
+        //SET COOKIES INSTEAD OF RETURNING TOKENS
+        jwtCookieUtil.addAccessTokenCookie(response, accessToken);
+        jwtCookieUtil.addRefreshTokenCookie(response, refreshToken.getToken());
+
+        return ResponseEntity.ok("Login successful");
     }
 
 //    @PostMapping("/refresh")
@@ -80,35 +113,83 @@ public class AuthController {
 //                new AuthResponse(newAccessToken, request.getRefreshToken())
 //        );
 //    }
-    @Transactional
+//    @Transactional
+//    @PostMapping("/refresh")
+//    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+//
+//        RefreshToken refreshToken = refreshTokenService
+//                .findByToken(request.getRefreshToken())
+//                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+//
+//        refreshTokenService.verifyExpiration(refreshToken);
+//
+//        User user = refreshToken.getUser();
+//
+//        // DELETE OLD TOKEN
+//        refreshTokenRepository.delete(refreshToken);
+//
+//        //CREATE NEW TOKEN (rotation)
+//        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserId());
+//
+//        CustomUserDetails userDetails = new CustomUserDetails(user);
+//
+//        String newAccessToken = jwtUtil.generateToken(userDetails);
+//
+//        return ResponseEntity.ok(
+//                new AuthResponse(newAccessToken, newRefreshToken.getToken())
+//        );
+//    }
+
+
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<String> refreshToken(HttpServletRequest request,
+                                               HttpServletResponse response) {
+
+        String refreshTokenValue = null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("refreshToken".equals(cookie.getName())) {
+                refreshTokenValue = cookie.getValue();
+            }
+        }
 
         RefreshToken refreshToken = refreshTokenService
-                .findByToken(request.getRefreshToken())
+                .findByToken(refreshTokenValue)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
         refreshTokenService.verifyExpiration(refreshToken);
 
         User user = refreshToken.getUser();
 
-        // DELETE OLD TOKEN
         refreshTokenRepository.delete(refreshToken);
 
-        //CREATE NEW TOKEN (rotation)
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserId());
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
         String newAccessToken = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(
-                new AuthResponse(newAccessToken, newRefreshToken.getToken())
-        );
+        jwtCookieUtil.addAccessTokenCookie(response, newAccessToken);
+        jwtCookieUtil.addRefreshTokenCookie(response, newRefreshToken.getToken());
+
+        return ResponseEntity.ok("Token refreshed");
     }
 
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout() {
+//
+//        Long userId = (Long) SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getCredentials();
+//
+//        refreshTokenService.deleteByUserId(userId);
+//
+//        return ResponseEntity.ok("Logged out successfully");
+//    }
+
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<String> logout(HttpServletResponse response) {
 
         Long userId = (Long) SecurityContextHolder
                 .getContext()
@@ -116,6 +197,9 @@ public class AuthController {
                 .getCredentials();
 
         refreshTokenService.deleteByUserId(userId);
+
+        // CLEAR COOKIES
+        jwtCookieUtil.clearCookies(response);
 
         return ResponseEntity.ok("Logged out successfully");
     }

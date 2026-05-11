@@ -2,6 +2,7 @@ package com.solydshop.ecommerce.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,21 +29,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-
         String token = null;
         String username = null;
         Long userId = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        // READ TOKEN FROM COOKIES INSTEAD OF HEADER
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break; // important fix
+                }
+            }
+        }
 
-            token = authHeader.substring(7);
-
+        if (token != null) {
             username = jwtUtil.extractUsername(token);
             userId = jwtUtil.extractUserId(token);
         }
 
-        if (userId != null &&
+        if (username != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
 
             if (jwtUtil.validateToken(token, username)) {
@@ -54,19 +60,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .collect(Collectors.toList());
 
                 UsernamePasswordAuthenticationToken authToken =
-//                        new UsernamePasswordAuthenticationToken(
-//                                userId,
-//                                null,
-//                                authorities
-//                        );
                         new UsernamePasswordAuthenticationToken(
-                                username, // keeping username for Spring Security
-                                userId,   // storing userId in credentials
+                                username,
+                                userId,
                                 authorities
                         );
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
