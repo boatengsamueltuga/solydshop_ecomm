@@ -50,4 +50,12 @@ public class CartController {
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> testProtectedApi() {
+
+        return ResponseEntity.ok(
+                "Protected API works"
+        );
+    }
 }

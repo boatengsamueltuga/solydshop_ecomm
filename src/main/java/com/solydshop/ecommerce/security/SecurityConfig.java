@@ -65,7 +65,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/auth/**")
+                        .ignoringRequestMatchers(
+                                "/api/auth/**",
+                                "/h2-console/**"
+                        )
                 )
 
                 .cors(cors -> {})
