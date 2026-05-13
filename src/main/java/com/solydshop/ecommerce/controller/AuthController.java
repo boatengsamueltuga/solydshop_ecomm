@@ -252,4 +252,21 @@ public class AuthController {
 
         return ResponseEntity.ok("User registered successfully");
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(
+            Authentication authentication
+    ) {
+
+        if (authentication == null) {
+
+            return ResponseEntity
+                    .status(401)
+                    .body("Unauthorized");
+        }
+
+        return ResponseEntity.ok(
+                authentication.getName()
+        );
+    }
 }
