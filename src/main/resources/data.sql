@@ -89,6 +89,7 @@ INSERT INTO PRODUCTS
     PRODUCT_ID,
     PRODUCT_NAME,
     DESCRIPTION,
+    IMAGE_URL,
     PRICE,
     QUANTITY,
     CATEGORY_ID
@@ -98,6 +99,7 @@ VALUES
     1,
     'CAT 320 Hydraulic Pump',
     'Heavy duty hydraulic pump for CAT excavators',
+    'https://images.pexels.com/photos/162553/keys-workshop-mechanic-tools-162553.jpeg',
     4500,
     15,
     1
@@ -108,6 +110,7 @@ INSERT INTO PRODUCTS
     PRODUCT_ID,
     PRODUCT_NAME,
     DESCRIPTION,
+    IMAGE_URL,
     PRICE,
     QUANTITY,
     CATEGORY_ID
@@ -117,6 +120,7 @@ VALUES
     2,
     'Komatsu Engine Filter',
     'Industrial engine oil filter',
+    'https://images.pexels.com/photos/3806288/pexels-photo-3806288.jpeg',
     120,
     50,
     2

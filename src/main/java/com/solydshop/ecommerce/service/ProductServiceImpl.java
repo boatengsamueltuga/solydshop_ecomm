@@ -47,6 +47,10 @@ public class ProductServiceImpl implements ProductService {
         dto.setPrice(product.getPrice());
         dto.setQuantity(product.getQuantity());
         dto.setCategoryName(product.getCategory().getCategoryName());
+
+        // Added imageUrl mapping
+        dto.setImageUrl(product.getImageUrl());
+
         return dto;
     }
 
@@ -73,6 +77,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
+
+        // Added imageUrl setter
+        product.setImageUrl(request.getImageUrl());
+
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
@@ -138,6 +146,7 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.delete(product);
     }
+
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Override
     public ProductDTO updateProduct(Long productId, ProductRequest request) {
@@ -160,6 +169,10 @@ public class ProductServiceImpl implements ProductService {
 
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
+
+        // Added imageUrl setter
+        product.setImageUrl(request.getImageUrl());
+
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);

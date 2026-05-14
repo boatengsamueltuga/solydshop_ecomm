@@ -10,6 +10,8 @@ public class ProductRequest {
 
     private String description;
 
+    private String imageUrl;
+
     @NotNull(message = "Price is required")
     private double price;
 
@@ -24,6 +26,14 @@ public class ProductRequest {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
 
@@ -32,4 +42,6 @@ public class ProductRequest {
 
     public Long getCategoryId() { return categoryId; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+
+
 }

@@ -265,8 +265,19 @@ public class AuthController {
                     .body("Unauthorized");
         }
 
+        String email = authentication.getName();
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
+
         return ResponseEntity.ok(
-                authentication.getName()
+                new AuthResponse(
+                        user.getUserId(),
+                        user.getEmail()
+                )
         );
     }
 }
