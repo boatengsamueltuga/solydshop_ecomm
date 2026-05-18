@@ -43,6 +43,18 @@ public class CartController {
         return ResponseEntity.ok(cartService.removeFromCart(userId, productId));
     }
 
+    // ---------------- DECREASE QUANTITY ----------------
+
+    @PutMapping("/{userId}/items/{productId}/decrease")
+    public ResponseEntity<CartDTO> decreaseQuantity(
+            @PathVariable Long userId,
+            @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(
+                cartService.decreaseQuantity(userId, productId)
+        );
+    }
+
     // ---------------- CLEAR CART ----------------
 
     @DeleteMapping("/{userId}")

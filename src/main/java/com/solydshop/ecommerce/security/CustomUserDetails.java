@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles()
                 .stream()
-                .map(Role::getRoleName) // uses your field
+                .map(Role::getRoleName)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
@@ -33,12 +33,15 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail(); // login with email
+        return user.getEmail();
     }
 
     @Override public boolean isAccountNonExpired() { return true; }
+
     @Override public boolean isAccountNonLocked() { return true; }
+
     @Override public boolean isCredentialsNonExpired() { return true; }
+
     @Override public boolean isEnabled() { return true; }
 
     public User getUser() {

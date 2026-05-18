@@ -11,5 +11,8 @@ public interface CartService {
 
     CartDTO removeFromCart(Long userId, Long productId);
 
+    // Added decrease quantity
+    CartDTO decreaseQuantity(Long userId, Long productId);
+
     void clearCart(Long userId);
 }

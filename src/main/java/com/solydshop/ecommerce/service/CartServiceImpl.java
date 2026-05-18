@@ -129,6 +129,45 @@ public class CartServiceImpl implements CartService {
         return mapToDTO(cart);
     }
 
+    // -------------------- DECREASE QUANTITY --------------------
+
+    public CartDTO decreaseQuantity(Long userId, Long productId) {
+
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Cart not found for user: " + userId
+                        ));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Product not found with id: " + productId
+                        ));
+
+        CartItem item = cartItemRepository
+                .findByCartAndProduct(cart, product)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Product not in cart"
+                        ));
+
+        // Decrease quantity
+        item.setQuantity(item.getQuantity() - 1);
+
+        // Remove item completely if quantity becomes 0
+        if (item.getQuantity() <= 0) {
+
+            cart.getCartItems().remove(item);
+
+            cartItemRepository.delete(item);
+        }
+
+        cartRepository.save(cart);
+
+        return mapToDTO(cart);
+    }
+
     @Override
     public void clearCart(Long userId) {
 
