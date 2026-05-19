@@ -273,10 +273,15 @@ public class AuthController {
                         new RuntimeException("User not found")
                 );
 
+        // Added roles to authenticated user response
         return ResponseEntity.ok(
                 new AuthResponse(
                         user.getUserId(),
-                        user.getEmail()
+                        user.getEmail(),
+                        user.getRoles()
+                                .stream()
+                                .map(role -> role.getRoleName())
+                                .toList()
                 )
         );
     }

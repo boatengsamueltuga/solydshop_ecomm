@@ -67,7 +67,8 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
                         .ignoringRequestMatchers(
                                 "/api/auth/**",
-                                "/h2-console/**"
+                                "/h2-console/**",
+                                "/api/upload/**"
                         )
                 )
 
@@ -85,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/upload/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/seller/**").hasAnyRole("SELLER", "ADMIN")

@@ -16,28 +16,32 @@ VALUES (3, 'ROLE_SELLER');
 -- password = 1234
 -- =========================
 
-INSERT INTO USERS (EMAIL, NAME, PASSWORD) VALUES
+INSERT INTO USERS (EMAIL, NAME, PASSWORD)
+VALUES
 (
     'admin@mail.com',
     'Admin User',
     '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'
 );
 
-INSERT INTO USERS (EMAIL, NAME, PASSWORD) VALUES
+INSERT INTO USERS (EMAIL, NAME, PASSWORD)
+VALUES
 (
     'seller1@mail.com',
     'Seller One',
     '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'
 );
 
-INSERT INTO USERS (EMAIL, NAME, PASSWORD) VALUES
+INSERT INTO USERS (EMAIL, NAME, PASSWORD)
+VALUES
 (
     'seller2@mail.com',
     'Seller Two',
     '$2a$10$GmlnkUK0bmBWerLak6nEZOj6qyjbmHcK5.wvtjAhAKYb4E0jFtHhS'
 );
 
-INSERT INTO USERS (EMAIL, NAME, PASSWORD) VALUES
+INSERT INTO USERS (EMAIL, NAME, PASSWORD)
+VALUES
 (
     'user@mail.com',
     'Normal User',
@@ -82,11 +86,12 @@ VALUES
 
 -- =========================
 -- PRODUCTS
+-- PRODUCT_ID removed so H2
+-- auto-generates IDs correctly
 -- =========================
 
 INSERT INTO PRODUCTS
 (
-    PRODUCT_ID,
     PRODUCT_NAME,
     DESCRIPTION,
     IMAGE_URL,
@@ -96,7 +101,6 @@ INSERT INTO PRODUCTS
 )
 VALUES
 (
-    1,
     'CAT 320 Hydraulic Pump',
     'Heavy duty hydraulic pump for CAT excavators',
     'https://images.pexels.com/photos/162553/keys-workshop-mechanic-tools-162553.jpeg',
@@ -107,7 +111,6 @@ VALUES
 
 INSERT INTO PRODUCTS
 (
-    PRODUCT_ID,
     PRODUCT_NAME,
     DESCRIPTION,
     IMAGE_URL,
@@ -117,7 +120,6 @@ INSERT INTO PRODUCTS
 )
 VALUES
 (
-    2,
     'Komatsu Engine Filter',
     'Industrial engine oil filter',
     'https://images.pexels.com/photos/3806288/pexels-photo-3806288.jpeg',

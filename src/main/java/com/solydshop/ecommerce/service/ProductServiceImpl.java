@@ -54,10 +54,29 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
-    // NEW METHOD (uses JWT userId from credentials)
+//    // NEW METHOD (uses JWT userId from credentials)
+//    private Long getCurrentUserId() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        return (Long) authentication.getCredentials();
+//    }
+
+    // Get currently authenticated user by email
     private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Long) authentication.getCredentials();
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found")
+                );
+
+        return user.getUserId();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")

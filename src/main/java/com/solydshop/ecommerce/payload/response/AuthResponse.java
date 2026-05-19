@@ -1,26 +1,41 @@
 package com.solydshop.ecommerce.payload.response;
 
+import java.util.List;
+
 public class AuthResponse {
 
     private Long userId;
+
     private String email;
 
+    // Added roles for frontend authorization
+    private List<String> roles;
+
     private String accessToken;
+
     private String refreshToken;
 
     public AuthResponse() {
     }
 
-    // Existing constructor
-    public AuthResponse(String accessToken, String refreshToken) {
+    // Login response constructor
+    public AuthResponse(
+            String accessToken,
+            String refreshToken
+    ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
 
-    // Added constructor for /me endpoint
-    public AuthResponse(Long userId, String email) {
+    // /me endpoint response constructor
+    public AuthResponse(
+            Long userId,
+            String email,
+            List<String> roles
+    ) {
         this.userId = userId;
         this.email = email;
+        this.roles = roles;
     }
 
     public Long getUserId() {
@@ -29,6 +44,10 @@ public class AuthResponse {
 
     public String getEmail() {
         return email;
+    }
+
+    public List<String> getRoles() {
+        return roles;
     }
 
     public String getAccessToken() {
