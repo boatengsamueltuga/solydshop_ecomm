@@ -41,23 +41,36 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUser(user);
 
-
         order.setStatus(OrderStatus.PENDING);
-
 
         double total = 0;
 
         for (CartItem cartItem : cart.getCartItems()) {
 
+            Product product = cartItem.getProduct();
+
+            // Added stock validation
+            if (product.getQuantity() < cartItem.getQuantity()) {
+
+                throw new RuntimeException(
+                        product.getProductName() + " is out of stock"
+                );
+            }
+
+            // Added inventory reduction
+            product.setQuantity(
+                    product.getQuantity() - cartItem.getQuantity()
+            );
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getProduct().getPrice());
+            orderItem.setPrice(product.getPrice());
 
             order.getOrderItems().add(orderItem);
 
-            total += cartItem.getQuantity() * cartItem.getProduct().getPrice();
+            total += cartItem.getQuantity() * product.getPrice();
         }
 
         order.setTotalAmount(total);
