@@ -111,22 +111,78 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public ProductResponse getAllProducts(
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortOrder,
+            String keyword,
+            Long categoryId
+    ) {
 
         Sort sort = sortOrder.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Pageable pageable = PageRequest.of(
+                pageNumber,
+                pageSize,
+                sort
+        );
 
-        Page<Product> pageProducts = productRepository.findAll(pageable);
+        Page<Product> pageProducts;
 
-        List<ProductDTO> productDTOs = pageProducts.getContent()
-                .stream()
-                .map(this::mapToDTO)
-                .toList();
+        // Search by keyword and category
+        if (keyword != null && !keyword.isBlank()
+                && categoryId != null) {
+
+            pageProducts =
+                    productRepository
+                            .findByProductNameContainingIgnoreCaseAndCategoryCategoryId(
+                                    keyword,
+                                    categoryId,
+                                    pageable
+                            );
+        }
+
+        // Search by keyword only
+        else if (keyword != null && !keyword.isBlank()) {
+
+            pageProducts =
+                    productRepository
+                            .findByProductNameContainingIgnoreCase(
+                                    keyword,
+                                    pageable
+                            );
+        }
+
+        // Filter by category only
+        else if (categoryId != null) {
+
+            pageProducts =
+                    productRepository
+                            .findByCategoryCategoryId(
+                                    categoryId,
+                                    pageable
+                            );
+        }
+
+        // Get all products
+        else {
+
+            pageProducts =
+                    productRepository
+                            .findAll(pageable);
+        }
+
+        List<ProductDTO> productDTOs =
+                pageProducts.getContent()
+                        .stream()
+                        .map(this::mapToDTO)
+                        .toList();
 
         ProductResponse response = new ProductResponse();
+
         response.setContent(productDTOs);
         response.setPageNumber(pageProducts.getNumber());
         response.setPageSize(pageProducts.getSize());

@@ -8,7 +8,15 @@ public interface ProductService {
 
     ProductDTO createProduct(ProductRequest request);
 
-    ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    // Get all products with optional filters
+    ProductResponse getAllProducts(
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortOrder,
+            String keyword,
+            Long categoryId
+    );
 
     ProductDTO getProductById(Long productId);
 
@@ -16,5 +24,10 @@ public interface ProductService {
 
     ProductDTO updateProduct(Long productId, ProductRequest request);
 
-    ProductResponse getProductsForCurrentSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductResponse getProductsForCurrentSeller(
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortOrder
+    );
 }
