@@ -95,15 +95,23 @@ public class CartServiceImpl implements CartService {
         return mapToDTO(cart);
     }
 
-    @Override
-    public CartDTO getCart(Long userId) {
+//    @Override
+//    public CartDTO getCart(Long userId) {
+//
+//        Cart cart = cartRepository.findByUserId(userId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException("Cart not found for user: " + userId));
+//
+//        return mapToDTO(cart);
+//    }
+@Override
+public CartDTO getCart(Long userId) {
 
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Cart not found for user: " + userId));
+    Cart cart = cartRepository.findByUserId(userId)
+            .orElseGet(() -> createNewCart(userId));
 
-        return mapToDTO(cart);
-    }
+    return mapToDTO(cart);
+}
 
     @Override
     public CartDTO removeFromCart(Long userId, Long productId) {
