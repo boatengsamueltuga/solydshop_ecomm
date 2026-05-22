@@ -205,15 +205,39 @@ public class AuthController {
 //        return ResponseEntity.ok("Logged out successfully");
 //    }
 
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout(HttpServletResponse response) {
+//
+//        Long userId = (Long) SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getCredentials();
+//
+//        refreshTokenService.deleteByUserId(userId);
+//
+//        // CLEAR COOKIES
+//        jwtCookieUtil.clearCookies(response);
+//
+//        return ResponseEntity.ok("Logged out successfully");
+//    }
+
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
+    public ResponseEntity<String> logout(
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
 
-        Long userId = (Long) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getCredentials();
+        if (authentication != null) {
 
-        refreshTokenService.deleteByUserId(userId);
+            CustomUserDetails userDetails =
+                    (CustomUserDetails) authentication.getPrincipal();
+
+            Long userId = userDetails
+                    .getUser()
+                    .getUserId();
+
+            refreshTokenService.deleteByUserId(userId);
+        }
 
         // CLEAR COOKIES
         jwtCookieUtil.clearCookies(response);
@@ -264,14 +288,11 @@ public class AuthController {
                     .status(401)
                     .body("Unauthorized");
         }
+                CustomUserDetails userDetails =
+                        (CustomUserDetails) authentication.getPrincipal();
 
-        String email = authentication.getName();
+                User user = userDetails.getUser();
 
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found")
-                );
 
         // Added roles to authenticated user response
         return ResponseEntity.ok(

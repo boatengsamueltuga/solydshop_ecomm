@@ -210,13 +210,38 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Product not found with id: " + productId)
+                        new ResourceNotFoundException(
+                                "Product not found with id: " + productId
+                        )
+                );
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        boolean isAdmin = authentication
+                .getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN")
                 );
 
         Long userId = getCurrentUserId();
 
-        if (!product.getSeller().getUserId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to delete this product");
+    /*
+    ---------------------------------------------------------------
+    | Sellers Can Only Delete Their Own Products
+    | Admins Can Delete Any Product
+    ---------------------------------------------------------------
+    */
+
+        if (!isAdmin &&
+                !product.getSeller().getUserId().equals(userId)) {
+
+            throw new RuntimeException(
+                    "You are not authorized to delete this product"
+            );
         }
 
         productRepository.delete(product);

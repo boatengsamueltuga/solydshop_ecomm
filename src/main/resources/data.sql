@@ -86,8 +86,6 @@ VALUES
 
 -- =========================
 -- PRODUCTS
--- PRODUCT_ID removed so H2
--- auto-generates IDs correctly
 -- =========================
 
 INSERT INTO PRODUCTS
@@ -97,7 +95,8 @@ INSERT INTO PRODUCTS
     IMAGE_URL,
     PRICE,
     QUANTITY,
-    CATEGORY_ID
+    CATEGORY_ID,
+    SELLER_ID
 )
 VALUES
 (
@@ -106,7 +105,8 @@ VALUES
     'https://images.pexels.com/photos/162553/keys-workshop-mechanic-tools-162553.jpeg',
     4500,
     15,
-    1
+    1,
+    2
 );
 
 INSERT INTO PRODUCTS
@@ -116,7 +116,8 @@ INSERT INTO PRODUCTS
     IMAGE_URL,
     PRICE,
     QUANTITY,
-    CATEGORY_ID
+    CATEGORY_ID,
+    SELLER_ID
 )
 VALUES
 (
@@ -125,5 +126,6 @@ VALUES
     'https://images.pexels.com/photos/3806288/pexels-photo-3806288.jpeg',
     120,
     50,
-    2
+    2,
+    3
 );
