@@ -95,4 +95,27 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryRepository.delete(category);
     }
+
+    @Override
+    public CategoryDTO updateCategory(
+            Long categoryId,
+            CategoryRequest request
+    ) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Category not found with id: " + categoryId
+                        )
+                );
+
+        category.setCategoryName(
+                request.getCategoryName()
+        );
+
+        Category updatedCategory =
+                categoryRepository.save(category);
+
+        return mapToDTO(updatedCategory);
+    }
 }

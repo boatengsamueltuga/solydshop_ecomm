@@ -63,4 +63,18 @@ public class CategoryController {
         return ResponseEntity.ok("Category deleted successfully");
     }
 
+    @PutMapping("/admin/categories/{id}")
+    public ResponseEntity<CategoryDTO> updateCategory(
+
+            @PathVariable Long id,
+
+            @Valid @RequestBody CategoryRequest request
+    ) {
+
+        CategoryDTO category =
+                categoryService.updateCategory(id, request);
+
+        return ResponseEntity.ok(category);
+    }
+
 }
