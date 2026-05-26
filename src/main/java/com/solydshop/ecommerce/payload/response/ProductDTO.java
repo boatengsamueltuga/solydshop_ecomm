@@ -10,6 +10,16 @@ public class ProductDTO {
     private String categoryName;
     private String imageUrl;
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    private Long categoryId;
+
     public Long getProductId() {
         return productId;
     }

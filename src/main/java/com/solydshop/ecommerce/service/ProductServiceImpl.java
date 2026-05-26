@@ -40,16 +40,34 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductDTO mapToDTO(Product product) {
+
         ProductDTO dto = new ProductDTO();
+
         dto.setProductId(product.getProductId());
+
         dto.setProductName(product.getProductName());
+
         dto.setDescription(product.getDescription());
+
         dto.setPrice(product.getPrice());
+
         dto.setQuantity(product.getQuantity());
-        dto.setCategoryName(product.getCategory().getCategoryName());
+
+        dto.setCategoryName(
+                product.getCategory()
+                        .getCategoryName()
+        );
+
+        // Added categoryId mapping
+        dto.setCategoryId(
+                product.getCategory()
+                        .getCategoryId()
+        );
 
         // Added imageUrl mapping
-        dto.setImageUrl(product.getImageUrl());
+        dto.setImageUrl(
+                product.getImageUrl()
+        );
 
         return dto;
     }
@@ -258,8 +276,26 @@ public class ProductServiceImpl implements ProductService {
 
         Long userId = getCurrentUserId();
 
-        if (!product.getSeller().getUserId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to update this product");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found")
+                );
+
+        boolean isAdmin = user.getRoles()
+                .stream()
+                .anyMatch(role ->
+                        role.getRoleName()
+                                .equals("ROLE_ADMIN")
+                );
+
+        if (
+                !isAdmin &&
+                        !product.getSeller().getUserId().equals(userId)
+        ) {
+
+            throw new RuntimeException(
+                    "You are not authorized to update this product"
+            );
         }
 
         Category category = categoryRepository.findById(request.getCategoryId())
