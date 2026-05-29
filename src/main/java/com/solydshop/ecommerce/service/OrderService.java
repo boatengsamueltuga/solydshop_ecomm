@@ -1,4 +1,3 @@
-
 package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.payload.response.OrderDTO;
@@ -10,5 +9,10 @@ public interface OrderService {
     OrderDTO checkout(Long userId);
 
     List<OrderDTO> getUserOrders(Long userId);
+
+    List<OrderDTO> getAllOrders();
+
+    OrderDTO getOrderById(Long orderId);
+
     OrderDTO updateOrderStatus(Long orderId, String status);
 }

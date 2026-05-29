@@ -2,6 +2,7 @@ package com.solydshop.ecommerce.entity;
 
 import com.solydshop.ecommerce.OrderStatus.OrderStatus;
 import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,29 +20,74 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
 
+    private String customerName;
+
+    private String customerEmail;
+
+    private String shippingAddress;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order() {}
 
-    public Long getOrderId() { return orderId; }
+    public Long getOrderId() {
+        return orderId;
+    }
 
-    public double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
+    public double getTotalAmount() {
+        return totalAmount;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
-    // ===== ADDED GETTER/SETTER =====
-    public OrderStatus getStatus() { return status; }
-    public void setStatus(OrderStatus status) { this.status = status; }
-    // =============================
+    public User getUser() {
+        return user;
+    }
 
-    public List<OrderItem> getOrderItems() { return orderItems; }
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
 }

@@ -41,6 +41,11 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUser(user);
 
+        order.setCustomerName(user.getName());
+
+        order.setCustomerEmail(user.getEmail());
+
+        order.setShippingAddress("Address not provided");
         order.setStatus(OrderStatus.PENDING);
 
         double total = 0;
@@ -95,6 +100,14 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+    @Override
+    public List<OrderDTO> getAllOrders() {
+
+        return orderRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
 
     @Override
     public OrderDTO updateOrderStatus(Long orderId, String status) {
@@ -102,32 +115,51 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        order.setStatus(OrderStatus.valueOf(status.toUpperCase()));
+        try {
 
+            order.setStatus(OrderStatus.valueOf(status.toUpperCase()));
+
+        } catch (IllegalArgumentException e) {
+
+            throw new RuntimeException("Invalid order status");
+        }
         orderRepository.save(order);
 
         return mapToDTO(order);
     }
 
-
     private OrderDTO mapToDTO(Order order) {
 
         OrderDTO dto = new OrderDTO();
-        dto.setOrderId(order.getOrderId());
-        dto.setTotalAmount(order.getTotalAmount());
 
+        dto.setOrderId(order.getOrderId());
+
+        dto.setTotalAmount(order.getTotalAmount());
 
         dto.setStatus(order.getStatus().name());
 
+        dto.setUserId(order.getUser().getUserId());
+
+        dto.setCustomerName(order.getCustomerName());
+
+        dto.setCustomerEmail(order.getCustomerEmail());
+
+        dto.setShippingAddress(order.getShippingAddress());
 
         List<CartItemDTO> items = order.getOrderItems()
                 .stream()
                 .map(item -> {
+
                     CartItemDTO i = new CartItemDTO();
+
                     i.setProductId(item.getProduct().getProductId());
+
                     i.setProductName(item.getProduct().getProductName());
+
                     i.setQuantity(item.getQuantity());
+
                     i.setPrice(item.getPrice());
+
                     return i;
                 })
                 .toList();
@@ -136,4 +168,13 @@ public class OrderServiceImpl implements OrderService {
 
         return dto;
     }
+    @Override
+    public OrderDTO getOrderById(Long orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        return mapToDTO(order);
+    }
+
 }
