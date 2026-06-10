@@ -68,7 +68,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/api/auth/**",
                                 "/h2-console/**",
-                                "/api/upload/**"
+                                "/api/upload/**",
+                                "/api/payment/**"
                         )
                 )
 
@@ -95,6 +96,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/cart/**").authenticated()
                         //.requestMatchers("/api/order/**").hasRole("USER")
                         .requestMatchers("/api/order/**").authenticated()
+                        .requestMatchers("/api/payment/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

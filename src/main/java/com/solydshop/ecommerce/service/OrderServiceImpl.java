@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomerEmail(user.getEmail());
 
         order.setShippingAddress("Address not provided");
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.PROCESSING);
 
         double total = 0;
 
