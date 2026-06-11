@@ -29,6 +29,7 @@ import com.solydshop.ecommerce.security.CustomUserDetails;
 import com.solydshop.ecommerce.repository.RefreshTokenRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @RestController
@@ -270,7 +271,9 @@ public class AuthController {
                 .findByRoleName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        user.setRoles(Set.of(userRole));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
 
         userRepository.save(user);
 

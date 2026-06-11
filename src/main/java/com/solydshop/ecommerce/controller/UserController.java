@@ -1,13 +1,18 @@
 package com.solydshop.ecommerce.controller;
 
+import com.solydshop.ecommerce.entity.Role;
 import com.solydshop.ecommerce.entity.User;
+import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.response.UserDTO;
+import com.solydshop.ecommerce.repository.RoleRepository;
 import com.solydshop.ecommerce.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -15,10 +20,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping("/users")
@@ -35,6 +42,34 @@ public class UserController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<UserDTO> updateUserRole(
+            @PathVariable Long id,
+            @RequestParam String role) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Role newRole = roleRepository.findByRoleName(role)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + role));
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(newRole);
+        user.setRoles(roles);
+        userRepository.save(user);
+
+        UserDTO dto = new UserDTO(
+                user.getUserId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRoles().stream()
+                        .map(Role::getRoleName)
+                        .collect(Collectors.toList())
+        );
+
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/users/{id}")
