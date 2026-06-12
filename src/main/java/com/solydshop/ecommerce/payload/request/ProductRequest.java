@@ -10,6 +10,10 @@ public class ProductRequest {
 
     private String description;
 
+    private String modelNumber;
+
+    private String partNumber;
+
     private String imageUrl;
 
     @NotNull(message = "Price is required")
@@ -25,6 +29,12 @@ public class ProductRequest {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getModelNumber() { return modelNumber; }
+    public void setModelNumber(String modelNumber) { this.modelNumber = modelNumber; }
+
+    public String getPartNumber() { return partNumber; }
+    public void setPartNumber(String partNumber) { this.partNumber = partNumber; }
 
     public String getImageUrl() {
         return imageUrl;

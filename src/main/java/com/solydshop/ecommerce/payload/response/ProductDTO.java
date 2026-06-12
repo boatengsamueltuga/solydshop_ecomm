@@ -5,6 +5,8 @@ public class ProductDTO {
     private Long productId;
     private String productName;
     private String description;
+    private String modelNumber;
+    private String partNumber;
     private double price;
     private int quantity;
     private String categoryName;
@@ -66,6 +68,22 @@ public class ProductDTO {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getModelNumber() {
+        return modelNumber;
+    }
+
+    public void setModelNumber(String modelNumber) {
+        this.modelNumber = modelNumber;
+    }
+
+    public String getPartNumber() {
+        return partNumber;
+    }
+
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
     }
 
     public String getImageUrl() {

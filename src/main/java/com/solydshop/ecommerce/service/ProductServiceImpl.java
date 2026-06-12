@@ -49,6 +49,10 @@ public class ProductServiceImpl implements ProductService {
 
         dto.setDescription(product.getDescription());
 
+        dto.setModelNumber(product.getModelNumber());
+
+        dto.setPartNumber(product.getPartNumber());
+
         dto.setPrice(product.getPrice());
 
         dto.setQuantity(product.getQuantity());
@@ -114,10 +118,9 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
-
-        // Added imageUrl setter
+        product.setModelNumber(request.getModelNumber());
+        product.setPartNumber(request.getPartNumber());
         product.setImageUrl(request.getImageUrl());
-
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
@@ -156,7 +159,7 @@ public class ProductServiceImpl implements ProductService {
 
             pageProducts =
                     productRepository
-                            .findByProductNameContainingIgnoreCaseAndCategoryCategoryId(
+                            .searchByKeywordAndCategory(
                                     keyword,
                                     categoryId,
                                     pageable
@@ -168,7 +171,7 @@ public class ProductServiceImpl implements ProductService {
 
             pageProducts =
                     productRepository
-                            .findByProductNameContainingIgnoreCase(
+                            .searchByKeyword(
                                     keyword,
                                     pageable
                             );
@@ -305,10 +308,9 @@ public class ProductServiceImpl implements ProductService {
 
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
-
-        // Added imageUrl setter
+        product.setModelNumber(request.getModelNumber());
+        product.setPartNumber(request.getPartNumber());
         product.setImageUrl(request.getImageUrl());
-
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);

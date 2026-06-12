@@ -13,7 +13,12 @@ public class Product {
     @Column(nullable = false)
     private String productName;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    private String modelNumber;
+
+    private String partNumber;
 
     private double price;
 
@@ -92,6 +97,22 @@ public class Product {
 
     public void setSeller(User seller) {
         this.seller = seller;
+    }
+
+    public String getModelNumber() {
+        return modelNumber;
+    }
+
+    public void setModelNumber(String modelNumber) {
+        this.modelNumber = modelNumber;
+    }
+
+    public String getPartNumber() {
+        return partNumber;
+    }
+
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
     }
 
     public String getImageUrl() {
