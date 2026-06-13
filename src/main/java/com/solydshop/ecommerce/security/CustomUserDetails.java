@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override public boolean isAccountNonExpired() { return true; }
 
-    @Override public boolean isAccountNonLocked() { return true; }
+    @Override
+    public boolean isAccountNonLocked() {
+        LocalDateTime lockedUntil = user.getAccountLockedUntil();
+        return lockedUntil == null || LocalDateTime.now().isAfter(lockedUntil);
+    }
 
     @Override public boolean isCredentialsNonExpired() { return true; }
 

@@ -72,6 +72,16 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
+    @PutMapping("/users/{id}/unlock")
+    public ResponseEntity<String> unlockUser(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setFailedLoginAttempts(0);
+        user.setAccountLockedUntil(null);
+        userRepository.save(user);
+        return ResponseEntity.ok("User account unlocked successfully");
+    }
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {

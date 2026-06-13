@@ -1,6 +1,7 @@
 package com.solydshop.ecommerce.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -26,6 +27,15 @@ public class User {
     )
     private Set<Role> roles;
 
+    private String resetPasswordToken;
+
+    private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "failed_login_attempts", columnDefinition = "integer default 0")
+    private int failedLoginAttempts;
+
+    private LocalDateTime accountLockedUntil;
+
     public User() {}
 
     public Long getUserId() { return userId; }
@@ -42,4 +52,16 @@ public class User {
 
     public Set<Role> getRoles() { return roles; }
     public void setRoles(Set<Role> roles) { this.roles = roles; }
+
+    public String getResetPasswordToken() { return resetPasswordToken; }
+    public void setResetPasswordToken(String resetPasswordToken) { this.resetPasswordToken = resetPasswordToken; }
+
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
+
+    public int getFailedLoginAttempts() { return failedLoginAttempts; }
+    public void setFailedLoginAttempts(int failedLoginAttempts) { this.failedLoginAttempts = failedLoginAttempts; }
+
+    public LocalDateTime getAccountLockedUntil() { return accountLockedUntil; }
+    public void setAccountLockedUntil(LocalDateTime accountLockedUntil) { this.accountLockedUntil = accountLockedUntil; }
 }
