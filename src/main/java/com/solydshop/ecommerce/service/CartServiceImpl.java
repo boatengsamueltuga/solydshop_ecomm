@@ -50,6 +50,7 @@ public class CartServiceImpl implements CartService {
                     itemDTO.setProductName(item.getProduct().getProductName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPrice(item.getProduct().getPrice());
+                    itemDTO.setImageUrl(item.getProduct().getImageUrl());
                     return itemDTO;
                 })
                 .toList();

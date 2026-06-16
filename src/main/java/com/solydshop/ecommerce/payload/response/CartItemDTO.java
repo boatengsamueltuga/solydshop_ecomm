@@ -6,6 +6,7 @@ public class CartItemDTO {
     private String productName;
     private int quantity;
     private double price;
+    private String imageUrl;
 
     public Long getProductId() {
         return productId;
@@ -37,5 +38,13 @@ public class CartItemDTO {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
