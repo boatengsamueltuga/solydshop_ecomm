@@ -15,7 +15,8 @@ public interface ProductService {
             String sortBy,
             String sortOrder,
             String keyword,
-            Long categoryId
+            Long categoryId,
+            Double maxPrice
     );
 
     ProductDTO getProductById(Long productId);

@@ -69,7 +69,11 @@ public class ProductController {
 
             // Optional category filter
             @RequestParam(required = false)
-            Long categoryId
+            Long categoryId,
+
+            // Optional max price filter
+            @RequestParam(required = false)
+            Double maxPrice
     ) {
 
         ProductResponse response =
@@ -79,7 +83,8 @@ public class ProductController {
                         sortBy,
                         sortOrder,
                         keyword,
-                        categoryId
+                        categoryId,
+                        maxPrice
                 );
 
         return ResponseEntity.ok(response);

@@ -31,4 +31,31 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("categoryId") Long categoryId,
             Pageable pageable
     );
+
+    // Price-filtered variants
+
+    @Query("SELECT p FROM Product p WHERE p.price <= :maxPrice AND (" +
+           "LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.modelNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.partNumber)  LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> searchByKeywordWithMaxPrice(
+            @Param("keyword") String keyword,
+            @Param("maxPrice") Double maxPrice,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Product p WHERE p.category.categoryId = :categoryId AND p.price <= :maxPrice AND (" +
+           "LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.modelNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.partNumber)  LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> searchByKeywordAndCategoryWithMaxPrice(
+            @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
+            @Param("maxPrice") Double maxPrice,
+            Pageable pageable
+    );
+
+    Page<Product> findByCategoryCategoryIdAndPriceLessThanEqual(Long categoryId, Double maxPrice, Pageable pageable);
+
+    Page<Product> findByPriceLessThanEqual(Double maxPrice, Pageable pageable);
 }

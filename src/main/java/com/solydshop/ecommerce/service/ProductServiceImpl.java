@@ -138,7 +138,8 @@ public class ProductServiceImpl implements ProductService {
             String sortBy,
             String sortOrder,
             String keyword,
-            Long categoryId
+            Long categoryId,
+            Double maxPrice
     ) {
 
         Sort sort = sortOrder.equalsIgnoreCase("asc") ?
@@ -153,47 +154,26 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> pageProducts;
 
-        // Search by keyword and category
-        if (keyword != null && !keyword.isBlank()
-                && categoryId != null) {
+        boolean hasKeyword  = keyword != null && !keyword.isBlank();
+        boolean hasCategory = categoryId != null;
+        boolean hasPrice    = maxPrice != null;
 
-            pageProducts =
-                    productRepository
-                            .searchByKeywordAndCategory(
-                                    keyword,
-                                    categoryId,
-                                    pageable
-                            );
-        }
-
-        // Search by keyword only
-        else if (keyword != null && !keyword.isBlank()) {
-
-            pageProducts =
-                    productRepository
-                            .searchByKeyword(
-                                    keyword,
-                                    pageable
-                            );
-        }
-
-        // Filter by category only
-        else if (categoryId != null) {
-
-            pageProducts =
-                    productRepository
-                            .findByCategoryCategoryId(
-                                    categoryId,
-                                    pageable
-                            );
-        }
-
-        // Get all products
-        else {
-
-            pageProducts =
-                    productRepository
-                            .findAll(pageable);
+        if (hasKeyword && hasCategory && hasPrice) {
+            pageProducts = productRepository.searchByKeywordAndCategoryWithMaxPrice(keyword, categoryId, maxPrice, pageable);
+        } else if (hasKeyword && hasCategory) {
+            pageProducts = productRepository.searchByKeywordAndCategory(keyword, categoryId, pageable);
+        } else if (hasKeyword && hasPrice) {
+            pageProducts = productRepository.searchByKeywordWithMaxPrice(keyword, maxPrice, pageable);
+        } else if (hasKeyword) {
+            pageProducts = productRepository.searchByKeyword(keyword, pageable);
+        } else if (hasCategory && hasPrice) {
+            pageProducts = productRepository.findByCategoryCategoryIdAndPriceLessThanEqual(categoryId, maxPrice, pageable);
+        } else if (hasCategory) {
+            pageProducts = productRepository.findByCategoryCategoryId(categoryId, pageable);
+        } else if (hasPrice) {
+            pageProducts = productRepository.findByPriceLessThanEqual(maxPrice, pageable);
+        } else {
+            pageProducts = productRepository.findAll(pageable);
         }
 
         List<ProductDTO> productDTOs =
