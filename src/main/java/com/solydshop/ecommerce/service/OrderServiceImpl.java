@@ -146,6 +146,8 @@ public class OrderServiceImpl implements OrderService {
 
         dto.setShippingAddress(order.getShippingAddress());
 
+        dto.setCreatedAt(order.getCreatedAt());
+
         List<CartItemDTO> items = order.getOrderItems()
                 .stream()
                 .map(item -> {

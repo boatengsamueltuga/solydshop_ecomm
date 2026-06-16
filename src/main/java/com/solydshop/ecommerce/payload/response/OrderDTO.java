@@ -1,5 +1,8 @@
 package com.solydshop.ecommerce.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderDTO {
@@ -20,6 +23,8 @@ public class OrderDTO {
 
     private String shippingAddress;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
     public Long getOrderId() {
         return orderId;
@@ -83,5 +88,13 @@ public class OrderDTO {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
