@@ -26,7 +26,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO checkout(Long userId) {
+    public OrderDTO checkout(Long userId, String shippingAddress) {
 
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setCustomerEmail(user.getEmail());
 
-        order.setShippingAddress("Address not provided");
+        order.setShippingAddress(shippingAddress);
         order.setStatus(OrderStatus.PROCESSING);
 
         double total = 0;

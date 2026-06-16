@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    OrderDTO checkout(Long userId);
+    OrderDTO checkout(Long userId, String shippingAddress);
 
     List<OrderDTO> getUserOrders(Long userId);
 
