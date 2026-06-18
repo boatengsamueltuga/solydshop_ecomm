@@ -162,6 +162,8 @@ public class OrderServiceImpl implements OrderService {
 
                     i.setPrice(item.getPrice());
 
+                    i.setImageUrl(item.getProduct().getImageUrl());
+
                     return i;
                 })
                 .toList();

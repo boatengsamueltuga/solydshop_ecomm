@@ -139,42 +139,22 @@ public class ProductServiceImpl implements ProductService {
             String sortOrder,
             String keyword,
             Long categoryId,
-            Double maxPrice
+            Double maxPrice,
+            Boolean inStock
     ) {
 
         Sort sort = sortOrder.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(
-                pageNumber,
-                pageSize,
-                sort
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword : null;
+        boolean stockOnly = Boolean.TRUE.equals(inStock);
+
+        Page<Product> pageProducts = productRepository.findAllWithFilters(
+                kw, categoryId, maxPrice, stockOnly, pageable
         );
-
-        Page<Product> pageProducts;
-
-        boolean hasKeyword  = keyword != null && !keyword.isBlank();
-        boolean hasCategory = categoryId != null;
-        boolean hasPrice    = maxPrice != null;
-
-        if (hasKeyword && hasCategory && hasPrice) {
-            pageProducts = productRepository.searchByKeywordAndCategoryWithMaxPrice(keyword, categoryId, maxPrice, pageable);
-        } else if (hasKeyword && hasCategory) {
-            pageProducts = productRepository.searchByKeywordAndCategory(keyword, categoryId, pageable);
-        } else if (hasKeyword && hasPrice) {
-            pageProducts = productRepository.searchByKeywordWithMaxPrice(keyword, maxPrice, pageable);
-        } else if (hasKeyword) {
-            pageProducts = productRepository.searchByKeyword(keyword, pageable);
-        } else if (hasCategory && hasPrice) {
-            pageProducts = productRepository.findByCategoryCategoryIdAndPriceLessThanEqual(categoryId, maxPrice, pageable);
-        } else if (hasCategory) {
-            pageProducts = productRepository.findByCategoryCategoryId(categoryId, pageable);
-        } else if (hasPrice) {
-            pageProducts = productRepository.findByPriceLessThanEqual(maxPrice, pageable);
-        } else {
-            pageProducts = productRepository.findAll(pageable);
-        }
 
         List<ProductDTO> productDTOs =
                 pageProducts.getContent()

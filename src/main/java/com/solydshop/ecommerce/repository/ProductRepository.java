@@ -58,4 +58,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByCategoryCategoryIdAndPriceLessThanEqual(Long categoryId, Double maxPrice, Pageable pageable);
 
     Page<Product> findByPriceLessThanEqual(Double maxPrice, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE " +
+           "(CAST(:keyword AS string) IS NULL OR " +
+           "  LOWER(p.productName) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')) OR " +
+           "  LOWER(p.modelNumber) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')) OR " +
+           "  LOWER(p.partNumber)  LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%'))) AND " +
+           "(:categoryId IS NULL OR p.category.categoryId = :categoryId) AND " +
+           "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
+           "(:inStock = false OR p.quantity > 0)")
+    Page<Product> findAllWithFilters(
+            @Param("keyword")    String  keyword,
+            @Param("categoryId") Long    categoryId,
+            @Param("maxPrice")   Double  maxPrice,
+            @Param("inStock")    boolean inStock,
+            Pageable pageable
+    );
 }

@@ -73,7 +73,11 @@ public class ProductController {
 
             // Optional max price filter
             @RequestParam(required = false)
-            Double maxPrice
+            Double maxPrice,
+
+            // Optional in-stock filter
+            @RequestParam(required = false)
+            Boolean inStock
     ) {
 
         ProductResponse response =
@@ -84,7 +88,8 @@ public class ProductController {
                         sortOrder,
                         keyword,
                         categoryId,
-                        maxPrice
+                        maxPrice,
+                        inStock
                 );
 
         return ResponseEntity.ok(response);
