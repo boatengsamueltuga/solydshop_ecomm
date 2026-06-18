@@ -426,10 +426,10 @@ public class AuthController {
                 User user = userDetails.getUser();
 
 
-        // Added roles to authenticated user response
         return ResponseEntity.ok(
                 new AuthResponse(
                         user.getUserId(),
+                        user.getName(),
                         user.getEmail(),
                         user.getRoles()
                                 .stream()

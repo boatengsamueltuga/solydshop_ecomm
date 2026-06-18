@@ -6,6 +6,8 @@ public class AuthResponse {
 
     private Long userId;
 
+    private String name;
+
     private String email;
 
     // Added roles for frontend authorization
@@ -30,16 +32,22 @@ public class AuthResponse {
     // /me endpoint response constructor
     public AuthResponse(
             Long userId,
+            String name,
             String email,
             List<String> roles
     ) {
         this.userId = userId;
+        this.name = name;
         this.email = email;
         this.roles = roles;
     }
 
     public Long getUserId() {
         return userId;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
