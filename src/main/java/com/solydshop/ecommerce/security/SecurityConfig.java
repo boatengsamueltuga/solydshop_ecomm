@@ -97,6 +97,7 @@ public class SecurityConfig {
                         //.requestMatchers("/api/order/**").hasRole("USER")
                         .requestMatchers("/api/order/**").authenticated()
                         .requestMatchers("/api/payment/**").authenticated()
+                        .requestMatchers("/api/wishlist/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
