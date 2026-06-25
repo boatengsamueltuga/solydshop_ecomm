@@ -23,6 +23,8 @@ public class OrderDTO {
 
     private String shippingAddress;
 
+    private String stripePaymentIntentId;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
@@ -88,6 +90,14 @@ public class OrderDTO {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
+    }
+
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
     }
 
     public LocalDateTime getCreatedAt() {

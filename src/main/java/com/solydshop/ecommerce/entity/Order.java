@@ -36,6 +36,9 @@ public class Order {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(unique = true)
+    private String stripePaymentIntentId;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -99,5 +102,13 @@ public class Order {
 
     public List<OrderItem> getOrderItems() {
         return orderItems;
+    }
+
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
+    }
+
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
     }
 }

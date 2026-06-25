@@ -1,11 +1,11 @@
 package com.solydshop.ecommerce.controller;
 
-import com.solydshop.ecommerce.payload.request.CheckoutRequest;
 import com.solydshop.ecommerce.payload.response.OrderDTO;
+import com.solydshop.ecommerce.security.CustomUserDetails;
 import com.solydshop.ecommerce.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,18 +20,11 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("/{userId}/checkout")
-    public ResponseEntity<OrderDTO> checkout(
-            @PathVariable Long userId,
-            @Valid @RequestBody CheckoutRequest request) {
+    @GetMapping("/my")
+    public ResponseEntity<List<OrderDTO>> getMyOrders(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        return ResponseEntity.ok(orderService.checkout(userId, request.getShippingAddress()));
-    }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<OrderDTO>> getUserOrders(@PathVariable Long userId) {
-
-        return ResponseEntity.ok(orderService.getUserOrders(userId));
+        return ResponseEntity.ok(orderService.getUserOrders(userDetails.getUser().getUserId()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -47,17 +40,14 @@ public class OrderController {
             @PathVariable Long orderId,
             @RequestParam String status) {
 
-        return ResponseEntity.ok(
-                orderService.updateOrderStatus(orderId, status)
-        );
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/{orderId}")
     public ResponseEntity<OrderDTO> getOrderById(
             @PathVariable Long orderId) {
 
-        return ResponseEntity.ok(
-                orderService.getOrderById(orderId)
-        );
+        return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 }

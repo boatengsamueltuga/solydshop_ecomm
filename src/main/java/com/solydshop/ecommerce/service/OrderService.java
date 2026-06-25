@@ -6,7 +6,13 @@ import java.util.List;
 
 public interface OrderService {
 
-    OrderDTO checkout(Long userId, String shippingAddress);
+    OrderDTO createPendingOrder(Long userId, String shippingAddress);
+
+    void attachPaymentIntent(Long orderId, String paymentIntentId);
+
+    void confirmPayment(String paymentIntentId);
+
+    void failPayment(String paymentIntentId);
 
     List<OrderDTO> getUserOrders(Long userId);
 
