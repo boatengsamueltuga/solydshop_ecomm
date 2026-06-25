@@ -16,7 +16,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private double totalAmount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private java.math.BigDecimal totalAmount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -48,11 +49,11 @@ public class Order {
         return orderId;
     }
 
-    public double getTotalAmount() {
+    public java.math.BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(double totalAmount) {
+    public void setTotalAmount(java.math.BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 

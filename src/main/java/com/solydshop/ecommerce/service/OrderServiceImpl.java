@@ -9,6 +9,7 @@ import com.solydshop.ecommerce.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -31,10 +32,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
-    public OrderDTO createPendingOrder(Long userId, String shippingAddress) {
+    @Transactional(readOnly = true)
+    public BigDecimal getCartTotal(Long userId) {
 
         Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+        if (cart.getCartItems().isEmpty()) {
+            throw new RuntimeException("Cart is empty");
+        }
+
+        return cart.getCartItems().stream()
+                .map(item -> BigDecimal.valueOf(item.getProduct().getPrice())
+                        .multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Fix 1 & 2: PI-first flow — order created with PI ID in a single atomic transaction.
+    // If this throws, the caller cancels the Stripe PI. No orphaned orders, no zombie PIs.
+    @Override
+    @Transactional
+    public OrderDTO createPendingOrderWithPI(Long userId, String shippingAddress, String paymentIntentId) {
+
+        // Fix 6: pessimistic lock on cart prevents concurrent cart modifications
+        Cart cart = cartRepository.findByUserIdForUpdate(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         if (cart.getCartItems().isEmpty()) {
@@ -50,11 +71,14 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomerEmail(user.getEmail());
         order.setShippingAddress(shippingAddress);
         order.setStatus(OrderStatus.PAYMENT_PENDING);
+        order.setStripePaymentIntentId(paymentIntentId);
 
-        double total = 0;
+        // Fix 3: BigDecimal arithmetic for exact monetary totals
+        BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem cartItem : cart.getCartItems()) {
 
+            // Fix 4 (inventory): pessimistic lock prevents overselling under concurrent orders
             Product product = productRepository
                     .findByIdForUpdate(cartItem.getProduct().getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -63,17 +87,18 @@ public class OrderServiceImpl implements OrderService {
                 throw new RuntimeException(product.getProductName() + " is out of stock");
             }
 
-            // Reserve inventory — released on payment failure, permanent on success
             product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+
+            BigDecimal itemPrice = BigDecimal.valueOf(product.getPrice());
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(product.getPrice());
+            orderItem.setPrice(itemPrice);
 
             order.getOrderItems().add(orderItem);
-            total += cartItem.getQuantity() * product.getPrice();
+            total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
         order.setTotalAmount(total);
@@ -82,22 +107,12 @@ public class OrderServiceImpl implements OrderService {
         return mapToDTO(order);
     }
 
-    @Override
-    @Transactional
-    public void attachPaymentIntent(Long orderId, String paymentIntentId) {
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        order.setStripePaymentIntentId(paymentIntentId);
-        orderRepository.save(order);
-    }
-
+    // Fix 4: pessimistic lock on order row prevents duplicate webhook processing
     @Override
     @Transactional
     public void confirmPayment(String paymentIntentId) {
 
-        Order order = orderRepository.findByStripePaymentIntentId(paymentIntentId)
+        Order order = orderRepository.findByStripePaymentIntentIdForUpdate(paymentIntentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found for PI: " + paymentIntentId));
 
         if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
@@ -107,18 +122,18 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.PAID);
         orderRepository.save(order);
 
-        // Clear the customer's cart now that payment is confirmed
         cartRepository.findByUserId(order.getUser().getUserId()).ifPresent(cart -> {
             cart.getCartItems().clear();
             cartRepository.save(cart);
         });
     }
 
+    // Fix 4: pessimistic lock on order row prevents concurrent webhook race
     @Override
     @Transactional
     public void failPayment(String paymentIntentId) {
 
-        Order order = orderRepository.findByStripePaymentIntentId(paymentIntentId)
+        Order order = orderRepository.findByStripePaymentIntentIdForUpdate(paymentIntentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found for PI: " + paymentIntentId));
 
         if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
@@ -133,6 +148,18 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setStatus(OrderStatus.PAYMENT_FAILED);
+        orderRepository.save(order);
+    }
+
+    // Fix 5: used only after a Stripe refund has already been issued
+    @Override
+    @Transactional
+    public void cancelAfterRefund(Long orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
     }
 
@@ -167,7 +194,12 @@ public class OrderServiceImpl implements OrderService {
         try {
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
 
-            // Admin manages fulfillment only — payment transitions are automatic via webhook
+            // Fix 5: PAID orders must go through the refund endpoint before cancellation
+            if (newStatus == OrderStatus.CANCELLED && order.getStatus() == OrderStatus.PAID) {
+                throw new RuntimeException(
+                        "Paid orders must be refunded before cancellation. Use the refund endpoint.");
+            }
+
             Set<OrderStatus> adminAllowed = Set.of(
                     OrderStatus.PROCESSING,
                     OrderStatus.SHIPPED,

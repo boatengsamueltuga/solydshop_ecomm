@@ -2,17 +2,20 @@ package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.payload.response.OrderDTO;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrderService {
 
-    OrderDTO createPendingOrder(Long userId, String shippingAddress);
+    BigDecimal getCartTotal(Long userId);
 
-    void attachPaymentIntent(Long orderId, String paymentIntentId);
+    OrderDTO createPendingOrderWithPI(Long userId, String shippingAddress, String paymentIntentId);
 
     void confirmPayment(String paymentIntentId);
 
     void failPayment(String paymentIntentId);
+
+    void cancelAfterRefund(Long orderId);
 
     List<OrderDTO> getUserOrders(Long userId);
 

@@ -1,6 +1,7 @@
 package com.solydshop.ecommerce.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_items")
@@ -13,8 +14,8 @@ public class OrderItem {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal price;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "order_id", nullable = false)
@@ -31,8 +32,8 @@ public class OrderItem {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }

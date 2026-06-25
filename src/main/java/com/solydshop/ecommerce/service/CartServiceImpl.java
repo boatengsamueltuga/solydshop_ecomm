@@ -12,6 +12,7 @@ import com.solydshop.ecommerce.repository.CartRepository;
 import com.solydshop.ecommerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -49,7 +50,7 @@ public class CartServiceImpl implements CartService {
                     itemDTO.setProductId(item.getProduct().getProductId());
                     itemDTO.setProductName(item.getProduct().getProductName());
                     itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPrice(item.getProduct().getPrice());
+                    itemDTO.setPrice(BigDecimal.valueOf(item.getProduct().getPrice()));
                     itemDTO.setImageUrl(item.getProduct().getImageUrl());
                     return itemDTO;
                 })
@@ -57,9 +58,9 @@ public class CartServiceImpl implements CartService {
 
         dto.setItems(items);
 
-        double total = items.stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                .sum();
+        BigDecimal total = items.stream()
+                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         dto.setTotalPrice(total);
 
