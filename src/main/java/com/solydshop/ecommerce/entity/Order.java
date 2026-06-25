@@ -16,7 +16,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private double totalAmount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private java.math.BigDecimal totalAmount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -36,6 +37,9 @@ public class Order {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(unique = true)
+    private String stripePaymentIntentId;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -45,11 +49,11 @@ public class Order {
         return orderId;
     }
 
-    public double getTotalAmount() {
+    public java.math.BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(double totalAmount) {
+    public void setTotalAmount(java.math.BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 
@@ -99,5 +103,13 @@ public class Order {
 
     public List<OrderItem> getOrderItems() {
         return orderItems;
+    }
+
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
+    }
+
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
     }
 }
