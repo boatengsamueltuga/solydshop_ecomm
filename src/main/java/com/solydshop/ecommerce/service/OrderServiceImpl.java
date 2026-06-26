@@ -169,7 +169,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        return orderRepository.findByUser(user)
+        return orderRepository.findByUserOrderByCreatedAtDesc(user)
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
@@ -178,7 +178,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDTO> getAllOrders() {
 
-        return orderRepository.findAll()
+        return orderRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
