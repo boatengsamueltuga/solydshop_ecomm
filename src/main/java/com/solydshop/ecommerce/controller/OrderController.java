@@ -2,9 +2,11 @@ package com.solydshop.ecommerce.controller;
 
 import com.solydshop.ecommerce.payload.request.CheckoutRequest;
 import com.solydshop.ecommerce.payload.response.OrderDTO;
+import com.solydshop.ecommerce.security.CustomUserDetails;
 import com.solydshop.ecommerce.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,13 @@ public class OrderController {
             @Valid @RequestBody CheckoutRequest request) {
 
         return ResponseEntity.ok(orderService.checkout(userId, request.getShippingAddress()));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<OrderDTO>> getMyOrders(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return ResponseEntity.ok(orderService.getUserOrders(userDetails.getUser().getUserId()));
     }
 
     @GetMapping("/{userId}")
