@@ -158,12 +158,32 @@ public class PaymentController {
             return ResponseEntity.badRequest().body("Invalid signature");
         }
 
-        StripeObject stripeObject = event.getDataObjectDeserializer().getObject().orElse(null);
+        StripeObject stripeObject;
+        try {
+            stripeObject = event.getDataObjectDeserializer().getObject()
+                    .orElseGet(() -> {
+                        try {
+                            return event.getDataObjectDeserializer().deserializeUnsafe();
+                        } catch (Exception ex) {
+                            log.warn("Could not deserialize Stripe event {}: {}", event.getId(), ex.getMessage());
+                            return null;
+                        }
+                    });
+        } catch (Exception e) {
+            log.warn("Stripe event deserialization failed for {}: {}", event.getId(), e.getMessage());
+            stripeObject = null;
+        }
+
+        if (stripeObject == null) {
+            log.error("Stripe event {} has no deserializable object — skipping", event.getId());
+            return ResponseEntity.ok("ok");
+        }
 
         try {
             switch (event.getType()) {
                 case "payment_intent.succeeded" -> {
                     if (stripeObject instanceof PaymentIntent pi) {
+                        log.info("Processing payment_intent.succeeded for PI {}", pi.getId());
                         orderService.confirmPayment(pi.getId());
                     }
                 }
@@ -174,7 +194,6 @@ public class PaymentController {
                 }
             }
         } catch (Exception e) {
-            // Return 500 so Stripe retries; log for monitoring (Fix 8)
             log.error("Webhook handler failed for event {}: {}", event.getId(), e.getMessage());
             return ResponseEntity.internalServerError().body("Handler failed");
         }
