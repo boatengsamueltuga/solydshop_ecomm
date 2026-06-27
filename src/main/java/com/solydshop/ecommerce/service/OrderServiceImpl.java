@@ -141,8 +141,8 @@ public class OrderServiceImpl implements OrderService {
     private void dispatchOrderNotifications(Order order) {
         try {
             String title   = "New Order #" + order.getOrderId();
-            String message = "$" + order.getTotalAmount().toPlainString()
-                    + " from " + order.getCustomerName();
+            String message = String.format("$%,.2f from %s",
+                    order.getTotalAmount(), order.getCustomerName());
 
             List<User> admins  = userRepository.findByRoleName("ROLE_ADMIN");
             Set<Long>  adminIds = admins.stream().map(User::getUserId).collect(Collectors.toSet());
