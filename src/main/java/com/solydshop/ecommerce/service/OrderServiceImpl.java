@@ -138,11 +138,17 @@ public class OrderServiceImpl implements OrderService {
         dispatchOrderNotifications(order);
     }
 
+    private String formatAmount(java.math.BigDecimal amount) {
+        if (amount.compareTo(java.math.BigDecimal.valueOf(1_000_000)) >= 0) {
+            return String.format("$%,.2fM", amount.divide(java.math.BigDecimal.valueOf(1_000_000), 2, java.math.RoundingMode.HALF_UP));
+        }
+        return String.format("$%,.2f", amount);
+    }
+
     private void dispatchOrderNotifications(Order order) {
         try {
             String title   = "New Order #" + order.getOrderId();
-            String message = String.format("$%,.2f from %s",
-                    order.getTotalAmount(), order.getCustomerName());
+            String message = formatAmount(order.getTotalAmount()) + " from " + order.getCustomerName();
 
             List<User> admins  = userRepository.findByRoleName("ROLE_ADMIN");
             Set<Long>  adminIds = admins.stream().map(User::getUserId).collect(Collectors.toSet());
