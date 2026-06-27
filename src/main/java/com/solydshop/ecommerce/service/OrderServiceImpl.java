@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -20,15 +21,18 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
 
     public OrderServiceImpl(CartRepository cartRepository,
                             OrderRepository orderRepository,
                             UserRepository userRepository,
-                            ProductRepository productRepository) {
-        this.cartRepository = cartRepository;
-        this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-        this.productRepository = productRepository;
+                            ProductRepository productRepository,
+                            NotificationService notificationService) {
+        this.cartRepository      = cartRepository;
+        this.orderRepository     = orderRepository;
+        this.userRepository      = userRepository;
+        this.productRepository   = productRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -125,6 +129,35 @@ public class OrderServiceImpl implements OrderService {
         cartRepository.findByUserId(order.getUser().getUserId()).ifPresent(cart -> {
             cart.getCartItems().clear();
             cartRepository.save(cart);
+        });
+
+        dispatchOrderNotifications(order);
+    }
+
+    private void dispatchOrderNotifications(Order order) {
+        String title   = "New Order #" + order.getOrderId();
+        String message = "$" + order.getTotalAmount().toPlainString()
+                + " from " + order.getCustomerName();
+
+        // Notify all admins
+        userRepository.findByRoleName("ROLE_ADMIN")
+                .forEach(admin -> notificationService.createForUser(
+                        admin.getUserId(), title, message, "NEW_ORDER"));
+
+        // Notify each unique seller whose product was ordered
+        Set<Long> notifiedSellers = order.getOrderItems().stream()
+                .map(item -> item.getProduct().getSeller())
+                .filter(seller -> seller != null)
+                .map(User::getUserId)
+                .collect(Collectors.toSet());
+
+        notifiedSellers.forEach(sellerId -> {
+            boolean isAdmin = userRepository.findByRoleName("ROLE_ADMIN")
+                    .stream().anyMatch(a -> a.getUserId().equals(sellerId));
+            if (!isAdmin) {
+                notificationService.createForUser(
+                        sellerId, title, message, "NEW_ORDER");
+            }
         });
     }
 
