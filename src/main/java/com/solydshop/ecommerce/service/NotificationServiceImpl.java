@@ -5,6 +5,7 @@ import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.response.NotificationDTO;
 import com.solydshop.ecommerce.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createForUser(Long userId, String title, String message, String type) {
         notificationRepository.save(new Notification(userId, title, message, type));
     }

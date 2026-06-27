@@ -6,6 +6,8 @@ import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.response.CartItemDTO;
 import com.solydshop.ecommerce.payload.response.OrderDTO;
 import com.solydshop.ecommerce.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
@@ -135,30 +139,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void dispatchOrderNotifications(Order order) {
-        String title   = "New Order #" + order.getOrderId();
-        String message = "$" + order.getTotalAmount().toPlainString()
-                + " from " + order.getCustomerName();
+        try {
+            String title   = "New Order #" + order.getOrderId();
+            String message = "$" + order.getTotalAmount().toPlainString()
+                    + " from " + order.getCustomerName();
 
-        // Notify all admins
-        userRepository.findByRoleName("ROLE_ADMIN")
-                .forEach(admin -> notificationService.createForUser(
-                        admin.getUserId(), title, message, "NEW_ORDER"));
+            List<User> admins  = userRepository.findByRoleName("ROLE_ADMIN");
+            Set<Long>  adminIds = admins.stream().map(User::getUserId).collect(Collectors.toSet());
 
-        // Notify each unique seller whose product was ordered
-        Set<Long> notifiedSellers = order.getOrderItems().stream()
-                .map(item -> item.getProduct().getSeller())
-                .filter(seller -> seller != null)
-                .map(User::getUserId)
-                .collect(Collectors.toSet());
+            log.info("Dispatching NEW_ORDER notifications for order #{} to {} admin(s)", order.getOrderId(), adminIds.size());
 
-        notifiedSellers.forEach(sellerId -> {
-            boolean isAdmin = userRepository.findByRoleName("ROLE_ADMIN")
-                    .stream().anyMatch(a -> a.getUserId().equals(sellerId));
-            if (!isAdmin) {
-                notificationService.createForUser(
-                        sellerId, title, message, "NEW_ORDER");
-            }
-        });
+            adminIds.forEach(adminId ->
+                    notificationService.createForUser(adminId, title, message, "NEW_ORDER"));
+
+            Set<Long> sellerIds = order.getOrderItems().stream()
+                    .map(item -> item.getProduct().getSeller())
+                    .filter(seller -> seller != null)
+                    .map(User::getUserId)
+                    .filter(id -> !adminIds.contains(id))
+                    .collect(Collectors.toSet());
+
+            sellerIds.forEach(sellerId ->
+                    notificationService.createForUser(sellerId, title, message, "NEW_ORDER"));
+
+        } catch (Exception e) {
+            log.error("Failed to dispatch notifications for order #{}: {}", order.getOrderId(), e.getMessage(), e);
+        }
     }
 
     // Fix 4: pessimistic lock on order row prevents concurrent webhook race
