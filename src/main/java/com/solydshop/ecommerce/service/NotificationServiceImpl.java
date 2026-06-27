@@ -53,6 +53,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
+    public void deleteOne(Long notificationId, Long userId) {
+        Notification n = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
+        if (!n.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("Notification not found");
+        }
+        notificationRepository.delete(n);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(Long userId) {
+        notificationRepository.deleteAllByUserId(userId);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createForUser(Long userId, String title, String message, String type) {
         notificationRepository.save(new Notification(userId, title, message, type));

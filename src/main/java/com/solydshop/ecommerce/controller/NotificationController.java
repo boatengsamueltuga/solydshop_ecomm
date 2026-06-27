@@ -52,4 +52,21 @@ public class NotificationController {
         notificationService.markAllRead(userDetails.getUser().getUserId());
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOne(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        notificationService.deleteOne(id, userDetails.getUser().getUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteAll(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        notificationService.deleteAll(userDetails.getUser().getUserId());
+        return ResponseEntity.ok().build();
+    }
 }

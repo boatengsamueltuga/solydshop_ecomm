@@ -9,5 +9,7 @@ public interface NotificationService {
     long getUnreadCount(Long userId);
     void markRead(Long notificationId, Long userId);
     void markAllRead(Long userId);
+    void deleteOne(Long notificationId, Long userId);
+    void deleteAll(Long userId);
     void createForUser(Long userId, String title, String message, String type);
 }
