@@ -3,6 +3,7 @@ package com.solydshop.ecommerce.service;
 import com.solydshop.ecommerce.entity.Cart;
 import com.solydshop.ecommerce.entity.CartItem;
 import com.solydshop.ecommerce.entity.Product;
+import com.solydshop.ecommerce.entity.ProductStatus;
 import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.request.AddToCartRequest;
 import com.solydshop.ecommerce.payload.response.CartDTO;
@@ -52,6 +53,7 @@ public class CartServiceImpl implements CartService {
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPrice(BigDecimal.valueOf(item.getProduct().getPrice()));
                     itemDTO.setImageUrl(item.getProduct().getImageUrl());
+                    itemDTO.setAvailable(item.getProduct().getStatus() == ProductStatus.ACTIVE);
                     return itemDTO;
                 })
                 .toList();
@@ -78,6 +80,10 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
+
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            throw new RuntimeException("\"" + product.getProductName() + "\" is not available");
+        }
 
         CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
                 .orElse(null);

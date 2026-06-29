@@ -17,6 +17,10 @@ public class OrderItem {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal price;
 
+    // Snapshots taken at order time — survive product edits and deletes
+    private String productNameSnapshot;
+    private String imageUrlSnapshot;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
@@ -34,6 +38,12 @@ public class OrderItem {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getProductNameSnapshot() { return productNameSnapshot; }
+    public void setProductNameSnapshot(String productNameSnapshot) { this.productNameSnapshot = productNameSnapshot; }
+
+    public String getImageUrlSnapshot() { return imageUrlSnapshot; }
+    public void setImageUrlSnapshot(String imageUrlSnapshot) { this.imageUrlSnapshot = imageUrlSnapshot; }
 
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }

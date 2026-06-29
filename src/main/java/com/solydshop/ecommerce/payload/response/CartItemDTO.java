@@ -9,6 +9,7 @@ public class CartItemDTO {
     private int quantity;
     private BigDecimal price;
     private String imageUrl;
+    private boolean available = true;
 
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
@@ -24,4 +25,7 @@ public class CartItemDTO {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
 }
