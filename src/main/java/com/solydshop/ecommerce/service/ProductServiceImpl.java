@@ -120,19 +120,27 @@ public class ProductServiceImpl implements ProductService {
     // ── Notification helpers ─────────────────────────────────────────────────
 
     private void notifyAdmins(String title, String message, String type) {
+        notifyAdmins(title, message, type, null);
+    }
+
+    private void notifyAdmins(String title, String message, String type, Long resourceId) {
         try {
             List<User> admins = userRepository.findByRoleName("ROLE_ADMIN");
             admins.forEach(admin ->
-                    notificationService.createForUser(admin.getUserId(), title, message, type));
+                    notificationService.createForUser(admin.getUserId(), title, message, type, resourceId));
         } catch (Exception e) {
             log.warn("Failed to notify admins: {}", e.getMessage());
         }
     }
 
     private void notifySeller(User seller, String title, String message, String type) {
+        notifySeller(seller, title, message, type, null);
+    }
+
+    private void notifySeller(User seller, String title, String message, String type, Long resourceId) {
         if (seller == null) return;
         try {
-            notificationService.createForUser(seller.getUserId(), title, message, type);
+            notificationService.createForUser(seller.getUserId(), title, message, type, resourceId);
         } catch (Exception e) {
             log.warn("Failed to notify seller: {}", e.getMessage());
         }
@@ -169,11 +177,14 @@ public class ProductServiceImpl implements ProductService {
             product.setStatus(ProductStatus.PENDING_REVIEW);
             product.setSubmittedAt(LocalDateTime.now());
 
+            productRepository.save(product);
             notifyAdmins(
                     "New product pending review",
                     "\"" + request.getProductName() + "\" was submitted by " + seller.getName(),
-                    "PRODUCT_REVIEW"
+                    "PRODUCT_REVIEW",
+                    product.getProductId()
             );
+            return mapToDTO(product);
         }
 
         productRepository.save(product);
@@ -295,7 +306,8 @@ public class ProductServiceImpl implements ProductService {
             notifyAdmins(
                     "Product resubmitted for review",
                     "\"" + request.getProductName() + "\" was updated and is pending re-approval",
-                    "PRODUCT_REVIEW"
+                    "PRODUCT_REVIEW",
+                    product.getProductId()
             );
         }
 
@@ -385,7 +397,7 @@ public class ProductServiceImpl implements ProductService {
         notifySeller(product.getSeller(),
                 "Product approved",
                 "\"" + product.getProductName() + "\" is now live on the storefront",
-                "PRODUCT_APPROVED");
+                "PRODUCT_APPROVED", product.getProductId());
 
         return mapToAdminDTO(product);
     }
@@ -408,7 +420,7 @@ public class ProductServiceImpl implements ProductService {
         notifySeller(product.getSeller(),
                 "Product rejected",
                 "\"" + product.getProductName() + "\" was rejected: " + reason,
-                "PRODUCT_REJECTED");
+                "PRODUCT_REJECTED", product.getProductId());
 
         return mapToAdminDTO(product);
     }
@@ -430,7 +442,7 @@ public class ProductServiceImpl implements ProductService {
         notifySeller(product.getSeller(),
                 "Product suspended",
                 "\"" + product.getProductName() + "\" has been suspended and is no longer visible",
-                "PRODUCT_SUSPENDED");
+                "PRODUCT_SUSPENDED", product.getProductId());
 
         return mapToAdminDTO(product);
     }
@@ -452,7 +464,7 @@ public class ProductServiceImpl implements ProductService {
         notifySeller(product.getSeller(),
                 "Product reinstated",
                 "\"" + product.getProductName() + "\" is live again on the storefront",
-                "PRODUCT_REINSTATED");
+                "PRODUCT_REINSTATED", product.getProductId());
 
         return mapToAdminDTO(product);
     }
@@ -502,17 +514,17 @@ public class ProductServiceImpl implements ProductService {
             notifySeller(product.getSeller(),
                     "Product approved",
                     "\"" + product.getProductName() + "\" is now live on the storefront",
-                    "PRODUCT_APPROVED");
+                    "PRODUCT_APPROVED", product.getProductId());
         } else if (newStatus == ProductStatus.REJECTED) {
             notifySeller(product.getSeller(),
                     "Product rejected",
                     "\"" + product.getProductName() + "\" was rejected: " + request.getRejectionReason(),
-                    "PRODUCT_REJECTED");
+                    "PRODUCT_REJECTED", product.getProductId());
         } else if (newStatus == ProductStatus.SUSPENDED && previous != ProductStatus.SUSPENDED) {
             notifySeller(product.getSeller(),
                     "Product suspended",
                     "\"" + product.getProductName() + "\" has been suspended and is no longer visible",
-                    "PRODUCT_SUSPENDED");
+                    "PRODUCT_SUSPENDED", product.getProductId());
         }
 
         return mapToAdminDTO(product);
