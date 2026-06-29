@@ -286,17 +286,19 @@ public class ProductServiceImpl implements ProductService {
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
 
-        // Seller content edits pull the product back into the review queue
-        if (!admin && contentChanged) {
+        // Seller edits: resubmit if content changed OR if the product was previously rejected
+        // (seller explicitly clicking "Fix & Resubmit" counts as a resubmission even with only price/qty changes)
+        boolean wasRejected = product.getStatus() == ProductStatus.REJECTED;
+        if (!admin && (contentChanged || wasRejected)) {
             product.setStatus(ProductStatus.PENDING_REVIEW);
             product.setRejectionReason(null);
             product.setSubmittedAt(LocalDateTime.now());
 
-            notifyAdmins(
-                    "Product resubmitted for review",
-                    "\"" + request.getProductName() + "\" was updated and is pending re-approval",
-                    "PRODUCT_REVIEW"
-            );
+            String notifMsg = wasRejected
+                    ? "\"" + request.getProductName() + "\" was corrected and is pending re-approval"
+                    : "\"" + request.getProductName() + "\" was updated and is pending re-approval";
+
+            notifyAdmins("Product resubmitted for review", notifMsg, "PRODUCT_REVIEW");
         }
 
         productRepository.save(product);
