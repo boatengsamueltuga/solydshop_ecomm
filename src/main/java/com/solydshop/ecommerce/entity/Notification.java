@@ -29,6 +29,9 @@ public class Notification {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(nullable = true)
+    private Long resourceId;
+
     public Notification() {}
 
     public Notification(Long userId, String title, String message, String type) {
@@ -37,6 +40,11 @@ public class Notification {
         this.message   = message;
         this.type      = type;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Notification(Long userId, String title, String message, String type, Long resourceId) {
+        this(userId, title, message, type);
+        this.resourceId = resourceId;
     }
 
     public Long getId()                    { return id; }
@@ -59,4 +67,7 @@ public class Notification {
 
     public LocalDateTime getCreatedAt()                    { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt)      { this.createdAt = createdAt; }
+
+    public Long getResourceId()                { return resourceId; }
+    public void setResourceId(Long resourceId) { this.resourceId = resourceId; }
 }

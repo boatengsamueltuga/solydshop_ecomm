@@ -21,6 +21,7 @@ public class ProductDTO {
     }
 
     private Long categoryId;
+    private String status;
 
     public Long getProductId() {
         return productId;
@@ -93,4 +94,11 @@ public class ProductDTO {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    private String rejectionReason;
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 }

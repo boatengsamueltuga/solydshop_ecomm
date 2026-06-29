@@ -12,4 +12,5 @@ public interface NotificationService {
     void deleteOne(Long notificationId, Long userId);
     void deleteAll(Long userId);
     void createForUser(Long userId, String title, String message, String type);
+    void createForUser(Long userId, String title, String message, String type, Long resourceId);
 }

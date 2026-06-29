@@ -75,6 +75,12 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(new Notification(userId, title, message, type));
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createForUser(Long userId, String title, String message, String type, Long resourceId) {
+        notificationRepository.save(new Notification(userId, title, message, type, resourceId));
+    }
+
     private NotificationDTO toDTO(Notification n) {
         NotificationDTO dto = new NotificationDTO();
         dto.setId(n.getId());
@@ -83,6 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
         dto.setType(n.getType());
         dto.setRead(n.isRead());
         dto.setCreatedAt(n.getCreatedAt());
+        dto.setResourceId(n.getResourceId());
         return dto;
     }
 }

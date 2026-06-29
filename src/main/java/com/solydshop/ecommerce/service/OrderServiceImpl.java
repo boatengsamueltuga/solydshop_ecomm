@@ -2,6 +2,7 @@ package com.solydshop.ecommerce.service;
 
 import com.solydshop.ecommerce.OrderStatus.OrderStatus;
 import com.solydshop.ecommerce.entity.*;
+import com.solydshop.ecommerce.entity.ProductStatus;
 import com.solydshop.ecommerce.exception.ResourceNotFoundException;
 import com.solydshop.ecommerce.payload.response.CartItemDTO;
 import com.solydshop.ecommerce.payload.response.OrderDTO;
@@ -91,6 +92,10 @@ public class OrderServiceImpl implements OrderService {
                     .findByIdForUpdate(cartItem.getProduct().getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
+            if (product.getStatus() != ProductStatus.ACTIVE) {
+                throw new RuntimeException("\"" + product.getProductName() + "\" is no longer available");
+            }
+
             if (product.getQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException(product.getProductName() + " is out of stock");
             }
@@ -104,6 +109,9 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(itemPrice);
+            // Snapshot name and image at purchase time
+            orderItem.setProductNameSnapshot(product.getProductName());
+            orderItem.setImageUrlSnapshot(product.getImageUrl());
 
             order.getOrderItems().add(orderItem);
             total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
@@ -293,10 +301,15 @@ public class OrderServiceImpl implements OrderService {
                 .map(item -> {
                     CartItemDTO i = new CartItemDTO();
                     i.setProductId(item.getProduct().getProductId());
-                    i.setProductName(item.getProduct().getProductName());
+                    // Use snapshot if available (new orders), fall back to live for legacy orders
+                    i.setProductName(item.getProductNameSnapshot() != null
+                            ? item.getProductNameSnapshot()
+                            : item.getProduct().getProductName());
                     i.setQuantity(item.getQuantity());
                     i.setPrice(item.getPrice());
-                    i.setImageUrl(item.getProduct().getImageUrl());
+                    i.setImageUrl(item.getImageUrlSnapshot() != null
+                            ? item.getImageUrlSnapshot()
+                            : item.getProduct().getImageUrl());
                     return i;
                 })
                 .toList();
