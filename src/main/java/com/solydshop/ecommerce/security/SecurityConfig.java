@@ -93,6 +93,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/payment/**").authenticated()
                         .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/reviews/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
