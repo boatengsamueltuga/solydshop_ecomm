@@ -22,6 +22,9 @@ public class Product {
     private double price;
     private int quantity;
     private String imageUrl;
+    private String image2Url;
+    private String image3Url;
+    private String image4Url;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ACTIVE'")
@@ -71,6 +74,15 @@ public class Product {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getImage2Url() { return image2Url; }
+    public void setImage2Url(String image2Url) { this.image2Url = image2Url; }
+
+    public String getImage3Url() { return image3Url; }
+    public void setImage3Url(String image3Url) { this.image3Url = image3Url; }
+
+    public String getImage4Url() { return image4Url; }
+    public void setImage4Url(String image4Url) { this.image4Url = image4Url; }
 
     public ProductStatus getStatus() { return status; }
     public void setStatus(ProductStatus status) { this.status = status; }

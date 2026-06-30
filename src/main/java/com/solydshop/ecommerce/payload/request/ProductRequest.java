@@ -15,6 +15,9 @@ public class ProductRequest {
     private String partNumber;
 
     private String imageUrl;
+    private String image2Url;
+    private String image3Url;
+    private String image4Url;
 
     @NotNull(message = "Price is required")
     private double price;
@@ -36,13 +39,17 @@ public class ProductRequest {
     public String getPartNumber() { return partNumber; }
     public void setPartNumber(String partNumber) { this.partNumber = partNumber; }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public String getImage2Url() { return image2Url; }
+    public void setImage2Url(String image2Url) { this.image2Url = image2Url; }
+
+    public String getImage3Url() { return image3Url; }
+    public void setImage3Url(String image3Url) { this.image3Url = image3Url; }
+
+    public String getImage4Url() { return image4Url; }
+    public void setImage4Url(String image4Url) { this.image4Url = image4Url; }
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }

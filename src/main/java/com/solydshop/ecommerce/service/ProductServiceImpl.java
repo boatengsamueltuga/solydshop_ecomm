@@ -89,6 +89,9 @@ public class ProductServiceImpl implements ProductService {
         dto.setCategoryName(product.getCategory().getCategoryName());
         dto.setCategoryId(product.getCategory().getCategoryId());
         dto.setImageUrl(product.getImageUrl());
+        dto.setImage2Url(product.getImage2Url());
+        dto.setImage3Url(product.getImage3Url());
+        dto.setImage4Url(product.getImage4Url());
         dto.setStatus(product.getStatus().name());
         dto.setRejectionReason(product.getRejectionReason());
         return dto;
@@ -106,6 +109,9 @@ public class ProductServiceImpl implements ProductService {
         dto.setCategoryName(product.getCategory().getCategoryName());
         dto.setCategoryId(product.getCategory().getCategoryId());
         dto.setImageUrl(product.getImageUrl());
+        dto.setImage2Url(product.getImage2Url());
+        dto.setImage3Url(product.getImage3Url());
+        dto.setImage4Url(product.getImage4Url());
         dto.setStatus(product.getStatus().name());
         dto.setRejectionReason(product.getRejectionReason());
         dto.setSubmittedAt(product.getSubmittedAt());
@@ -162,6 +168,9 @@ public class ProductServiceImpl implements ProductService {
         product.setModelNumber(request.getModelNumber());
         product.setPartNumber(request.getPartNumber());
         product.setImageUrl(request.getImageUrl());
+        product.setImage2Url(request.getImage2Url());
+        product.setImage3Url(request.getImage3Url());
+        product.setImage4Url(request.getImage4Url());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
@@ -286,6 +295,9 @@ public class ProductServiceImpl implements ProductService {
                 !Objects.equals(product.getModelNumber(),  request.getModelNumber())  ||
                 !Objects.equals(product.getPartNumber(),   request.getPartNumber())   ||
                 !Objects.equals(product.getImageUrl(),     request.getImageUrl())     ||
+                !Objects.equals(product.getImage2Url(),    request.getImage2Url())    ||
+                !Objects.equals(product.getImage3Url(),    request.getImage3Url())    ||
+                !Objects.equals(product.getImage4Url(),    request.getImage4Url())    ||
                 !product.getCategory().getCategoryId().equals(request.getCategoryId());
 
         product.setProductName(request.getProductName());
@@ -293,6 +305,9 @@ public class ProductServiceImpl implements ProductService {
         product.setModelNumber(request.getModelNumber());
         product.setPartNumber(request.getPartNumber());
         product.setImageUrl(request.getImageUrl());
+        product.setImage2Url(request.getImage2Url());
+        product.setImage3Url(request.getImage3Url());
+        product.setImage4Url(request.getImage4Url());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(category);
