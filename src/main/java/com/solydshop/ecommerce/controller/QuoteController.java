@@ -51,4 +51,11 @@ public class QuoteController {
     public ResponseEntity<List<QuoteDTO>> adminQuotes() {
         return ResponseEntity.ok(quoteService.getAllQuotes());
     }
+
+    @PutMapping("/api/admin/quotes/{id}/respond")
+    public ResponseEntity<QuoteDTO> adminRespond(
+            @PathVariable Long id,
+            @RequestBody QuoteRespondPayload payload) {
+        return ResponseEntity.ok(quoteService.respondToQuoteAsAdmin(id, payload));
+    }
 }

@@ -11,5 +11,6 @@ public interface QuoteService {
     List<QuoteDTO> getBuyerQuotes(String buyerEmail);
     List<QuoteDTO> getSellerQuotes(String sellerEmail);
     QuoteDTO respondToQuote(Long quoteId, String sellerEmail, QuoteRespondPayload payload);
+    QuoteDTO respondToQuoteAsAdmin(Long quoteId, QuoteRespondPayload payload);
     List<QuoteDTO> getAllQuotes();
 }

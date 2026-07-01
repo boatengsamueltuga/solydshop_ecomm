@@ -53,15 +53,21 @@ public class QuoteServiceImpl implements QuoteService {
 
         quote = quoteRepository.save(quote);
 
+        String notifTitle   = "New quote request";
+        String notifMessage = buyer.getName() + " requested a quote for \""
+                + product.getProductName() + "\" (qty: " + payload.getQtyNeeded() + ")";
+        Long   quoteId      = quote.getQuoteId();
+
         if (product.getSeller() != null) {
             notificationService.createForUser(
-                    product.getSeller().getUserId(),
-                    "New quote request",
-                    buyer.getName() + " requested a quote for \"" + product.getProductName()
-                            + "\" (qty: " + payload.getQtyNeeded() + ")",
-                    "QUOTE_REQUEST",
-                    quote.getQuoteId()
-            );
+                    product.getSeller().getUserId(), notifTitle, notifMessage,
+                    "QUOTE_REQUEST", quoteId);
+        } else {
+            // Platform product — notify every admin
+            userRepository.findByRoleName("ROLE_ADMIN").forEach(admin ->
+                    notificationService.createForUser(
+                            admin.getUserId(), notifTitle, notifMessage,
+                            "QUOTE_REQUEST", quoteId));
         }
 
         return mapToDTO(quote);
@@ -106,6 +112,32 @@ public class QuoteServiceImpl implements QuoteService {
                 ? "Your quote for \"" + quote.getProduct().getProductName() + "\" was declined by the seller."
                 : seller.getName() + " responded to your quote for \"" + quote.getProduct().getProductName()
                         + "\" — quoted price: $" + String.format("%.2f", payload.getQuotedPrice());
+
+        notificationService.createForUser(
+                quote.getBuyer().getUserId(), title, message, "QUOTE_RESPONSE", quoteId);
+
+        return mapToDTO(quote);
+    }
+
+    @Override
+    public QuoteDTO respondToQuoteAsAdmin(Long quoteId, QuoteRespondPayload payload) {
+        QuoteRequest quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
+
+        boolean decline = "DECLINE".equalsIgnoreCase(payload.getAction());
+        quote.setStatus(decline ? QuoteStatus.DECLINED : QuoteStatus.RESPONDED);
+        quote.setQuotedPrice(decline ? null : payload.getQuotedPrice());
+        quote.setSellerNote(payload.getSellerNote());
+        quote.setRespondedAt(LocalDateTime.now());
+        quote = quoteRepository.save(quote);
+
+        String title   = decline ? "Quote declined" : "Quote received";
+        String message = decline
+                ? "Your quote request for \"" + quote.getProduct().getProductName()
+                        + "\" was declined."
+                : "Your quote for \"" + quote.getProduct().getProductName()
+                        + "\" has been answered — quoted price: $"
+                        + String.format("%.2f", payload.getQuotedPrice());
 
         notificationService.createForUser(
                 quote.getBuyer().getUserId(), title, message, "QUOTE_RESPONSE", quoteId);
