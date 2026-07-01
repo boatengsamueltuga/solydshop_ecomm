@@ -94,6 +94,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/reviews/**").authenticated()
+                        .requestMatchers("/api/seller-applications/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

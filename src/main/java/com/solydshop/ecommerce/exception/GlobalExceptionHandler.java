@@ -3,6 +3,7 @@ package com.solydshop.ecommerce.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -21,6 +22,18 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException ex) {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", ex.getStatusCode().value());
+        response.put("error", ex.getReason());
+        response.put("message", ex.getReason());
+
+        return new ResponseEntity<>(response, ex.getStatusCode());
     }
 
     @ExceptionHandler(RuntimeException.class)
