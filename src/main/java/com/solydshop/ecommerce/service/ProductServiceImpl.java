@@ -11,9 +11,13 @@ import com.solydshop.ecommerce.payload.response.AdminProductDTO;
 import com.solydshop.ecommerce.payload.response.AdminProductResponse;
 import com.solydshop.ecommerce.payload.response.ProductDTO;
 import com.solydshop.ecommerce.payload.response.ProductResponse;
+import com.solydshop.ecommerce.repository.CartItemRepository;
 import com.solydshop.ecommerce.repository.CategoryRepository;
 import com.solydshop.ecommerce.repository.ProductRepository;
+import com.solydshop.ecommerce.repository.QuoteRepository;
+import com.solydshop.ecommerce.repository.ReviewRepository;
 import com.solydshop.ecommerce.repository.UserRepository;
+import com.solydshop.ecommerce.repository.WishlistItemRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,20 +41,32 @@ public class ProductServiceImpl implements ProductService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
-    private final NotificationService notificationService;
+    private final ProductRepository    productRepository;
+    private final CategoryRepository   categoryRepository;
+    private final UserRepository       userRepository;
+    private final NotificationService  notificationService;
+    private final ReviewRepository     reviewRepository;
+    private final QuoteRepository      quoteRepository;
+    private final WishlistItemRepository wishlistItemRepository;
+    private final CartItemRepository   cartItemRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CategoryRepository categoryRepository,
                               UserRepository userRepository,
-                              NotificationService notificationService) {
-        this.productRepository    = productRepository;
-        this.categoryRepository   = categoryRepository;
-        this.userRepository       = userRepository;
-        this.notificationService  = notificationService;
+                              NotificationService notificationService,
+                              ReviewRepository reviewRepository,
+                              QuoteRepository quoteRepository,
+                              WishlistItemRepository wishlistItemRepository,
+                              CartItemRepository cartItemRepository) {
+        this.productRepository     = productRepository;
+        this.categoryRepository    = categoryRepository;
+        this.userRepository        = userRepository;
+        this.notificationService   = notificationService;
+        this.reviewRepository      = reviewRepository;
+        this.quoteRepository       = quoteRepository;
+        this.wishlistItemRepository = wishlistItemRepository;
+        this.cartItemRepository    = cartItemRepository;
     }
 
     // ── Role helpers ────────────────────────────────────────────────────────
@@ -241,6 +258,7 @@ public class ProductServiceImpl implements ProductService {
 
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Override
+    @Transactional
     public void deleteProduct(Long productId) {
 
         Product product = productRepository.findById(productId)
@@ -248,12 +266,18 @@ public class ProductServiceImpl implements ProductService {
                         "Product not found with id: " + productId));
 
         if (!isAdmin()) {
-            // Seller can only delete their own products
             if (product.getSeller() == null ||
                     !product.getSeller().getUserId().equals(getCurrentUserId())) {
                 throw new RuntimeException("You are not authorized to delete this product");
             }
         }
+
+        // Remove child records that would violate FK constraints.
+        // Order items are intentionally left — they block deletion to preserve order history.
+        reviewRepository.deleteByProductProductId(productId);
+        quoteRepository.deleteByProductProductId(productId);
+        cartItemRepository.deleteByProduct(product);
+        wishlistItemRepository.deleteByProduct(product);
 
         productRepository.delete(product);
     }

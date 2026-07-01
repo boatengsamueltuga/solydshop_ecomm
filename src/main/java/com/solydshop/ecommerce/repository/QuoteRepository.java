@@ -10,4 +10,5 @@ public interface QuoteRepository extends JpaRepository<QuoteRequest, Long> {
     List<QuoteRequest> findByBuyerOrderByCreatedAtDesc(User buyer);
     List<QuoteRequest> findBySellerOrderByCreatedAtDesc(User seller);
     List<QuoteRequest> findAllByOrderByCreatedAtDesc();
+    void deleteByProductProductId(Long productId);
 }
