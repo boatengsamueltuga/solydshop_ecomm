@@ -121,7 +121,7 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
         notificationService.createForUser(
                 user.getUserId(),
                 "Seller Application Approved",
-                "Congratulations! Your application for " + app.getBusinessName()
+                "Congratulations, " + user.getName() + "! Your application for " + app.getBusinessName()
                         + " has been approved. You can now list products on SolydShop.",
                 "SELLER_APPROVED",
                 app.getId()
