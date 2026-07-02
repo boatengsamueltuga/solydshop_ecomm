@@ -62,7 +62,18 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
         app.setMotivation(req.getMotivation());
         app.setStatus(ApplicationStatus.PENDING);
 
-        return SellerApplicationDTO.from(applicationRepo.save(app));
+        app = applicationRepo.save(app);
+
+        String title   = "New seller application";
+        String message = user.getName() + " (" + user.getEmail() + ") applied to sell as \""
+                + app.getBusinessName() + "\".";
+        Long   appId   = app.getId();
+
+        userRepo.findByRoleName("ROLE_ADMIN").forEach(admin ->
+                notificationService.createForUser(
+                        admin.getUserId(), title, message, "SELLER_APPLICATION", appId));
+
+        return SellerApplicationDTO.from(app);
     }
 
     @Override
