@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -20,6 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByIdForUpdate(@Param("id") Long id);
 
     Page<Product> findBySellerUserId(Long userId, Pageable pageable);
+
+    List<Product> findAllBySellerUserId(Long userId);
 
     // Public storefront — always filters to ACTIVE only
     @Query("SELECT p FROM Product p WHERE " +

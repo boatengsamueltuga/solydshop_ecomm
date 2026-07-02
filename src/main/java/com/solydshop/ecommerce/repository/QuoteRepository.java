@@ -1,6 +1,7 @@
 package com.solydshop.ecommerce.repository;
 
 import com.solydshop.ecommerce.entity.QuoteRequest;
+import com.solydshop.ecommerce.entity.QuoteStatus;
 import com.solydshop.ecommerce.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,5 @@ public interface QuoteRepository extends JpaRepository<QuoteRequest, Long> {
     List<QuoteRequest> findBySellerOrderByCreatedAtDesc(User seller);
     List<QuoteRequest> findAllByOrderByCreatedAtDesc();
     void deleteByProductProductId(Long productId);
+    long countBySellerAndStatus(User seller, QuoteStatus status);
 }
