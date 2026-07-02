@@ -14,4 +14,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
            "WHERE oi.product.seller.userId = :sellerId AND oi.order.status IN :statuses")
     long countDistinctOpenOrdersBySeller(@Param("sellerId") Long sellerId,
                                           @Param("statuses") List<OrderStatus> statuses);
+
+    // Only the seller's own line items -- other sellers' items in the same
+    // multi-vendor order are never returned. Excludes orders that never
+    // completed payment (nothing to fulfill yet).
+    @Query("SELECT oi FROM OrderItem oi " +
+           "WHERE oi.product.seller.userId = :sellerId " +
+           "AND oi.order.status NOT IN (com.solydshop.ecommerce.OrderStatus.OrderStatus.PAYMENT_PENDING, " +
+           "                            com.solydshop.ecommerce.OrderStatus.OrderStatus.PAYMENT_FAILED) " +
+           "ORDER BY oi.order.createdAt DESC")
+    List<OrderItem> findSellerOrderItems(@Param("sellerId") Long sellerId);
 }

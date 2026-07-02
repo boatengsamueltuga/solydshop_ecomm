@@ -26,17 +26,20 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final OrderItemRepository orderItemRepository;
     private final NotificationService notificationService;
 
     public OrderServiceImpl(CartRepository cartRepository,
                             OrderRepository orderRepository,
                             UserRepository userRepository,
                             ProductRepository productRepository,
+                            OrderItemRepository orderItemRepository,
                             NotificationService notificationService) {
         this.cartRepository      = cartRepository;
         this.orderRepository     = orderRepository;
         this.userRepository      = userRepository;
         this.productRepository   = productRepository;
+        this.orderItemRepository = orderItemRepository;
         this.notificationService = notificationService;
     }
 
@@ -242,6 +245,60 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getSellerOrders(Long sellerId) {
+
+        // Group the seller's own line items by order, preserving the
+        // most-recent-first order returned by the query.
+        java.util.LinkedHashMap<Long, List<OrderItem>> byOrder = new java.util.LinkedHashMap<>();
+        for (OrderItem item : orderItemRepository.findSellerOrderItems(sellerId)) {
+            byOrder.computeIfAbsent(item.getOrder().getOrderId(), k -> new java.util.ArrayList<>()).add(item);
+        }
+
+        return byOrder.values().stream()
+                .map(this::mapSellerItemsToDTO)
+                .toList();
+    }
+
+    // Builds an OrderDTO scoped to just this seller's items in a shared,
+    // possibly multi-vendor order. Other sellers' line items are never
+    // included, and the total reflects only this seller's share.
+    private OrderDTO mapSellerItemsToDTO(List<OrderItem> sellerItems) {
+        Order order = sellerItems.get(0).getOrder();
+
+        OrderDTO dto = new OrderDTO();
+        dto.setOrderId(order.getOrderId());
+        dto.setStatus(order.getStatus().name());
+        dto.setUserId(order.getUser().getUserId());
+        dto.setCustomerName(order.getCustomerName());
+        dto.setCustomerEmail(order.getCustomerEmail());
+        dto.setShippingAddress(order.getShippingAddress());
+        dto.setCreatedAt(order.getCreatedAt());
+        dto.setStripePaymentIntentId(order.getStripePaymentIntentId());
+
+        BigDecimal sellerTotal = BigDecimal.ZERO;
+        List<CartItemDTO> items = new java.util.ArrayList<>();
+        for (OrderItem item : sellerItems) {
+            CartItemDTO i = new CartItemDTO();
+            i.setProductId(item.getProduct().getProductId());
+            i.setProductName(item.getProductNameSnapshot() != null
+                    ? item.getProductNameSnapshot()
+                    : item.getProduct().getProductName());
+            i.setQuantity(item.getQuantity());
+            i.setPrice(item.getPrice());
+            i.setImageUrl(item.getImageUrlSnapshot() != null
+                    ? item.getImageUrlSnapshot()
+                    : item.getProduct().getImageUrl());
+            items.add(i);
+            sellerTotal = sellerTotal.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
+        dto.setItems(items);
+        dto.setTotalAmount(sellerTotal);
+
+        return dto;
     }
 
     @Override
