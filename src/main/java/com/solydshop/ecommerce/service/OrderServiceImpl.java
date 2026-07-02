@@ -214,6 +214,13 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
+
+        notificationService.createForUser(
+                order.getUser().getUserId(),
+                "Order #" + order.getOrderId() + " cancelled",
+                "Your order #" + order.getOrderId() + " has been refunded and cancelled.",
+                "ORDER_STATUS",
+                order.getOrderId());
     }
 
     @Override
@@ -271,7 +278,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderRepository.save(order);
+
+        notificationService.createForUser(
+                order.getUser().getUserId(),
+                "Order #" + order.getOrderId() + " updated",
+                "Your order #" + order.getOrderId() + " is now " + humanizeStatus(order.getStatus()) + ".",
+                "ORDER_STATUS",
+                order.getOrderId());
+
         return mapToDTO(order);
+    }
+
+    private String humanizeStatus(OrderStatus status) {
+        String name = status.name();
+        return name.charAt(0) + name.substring(1).toLowerCase();
     }
 
     @Override
