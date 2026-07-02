@@ -518,6 +518,11 @@ public class ProductServiceImpl implements ProductService {
         product.setStatus(ProductStatus.ARCHIVED);
         productRepository.save(product);
 
+        notifySeller(product.getSeller(),
+                "Product archived",
+                "\"" + product.getProductName() + "\" has been archived and is no longer available",
+                "PRODUCT_ARCHIVED", product.getProductId());
+
         return mapToAdminDTO(product);
     }
 
@@ -564,6 +569,11 @@ public class ProductServiceImpl implements ProductService {
                     "Product suspended",
                     "\"" + product.getProductName() + "\" has been suspended and is no longer visible",
                     "PRODUCT_SUSPENDED", product.getProductId());
+        } else if (newStatus == ProductStatus.ARCHIVED && previous != ProductStatus.ARCHIVED) {
+            notifySeller(product.getSeller(),
+                    "Product archived",
+                    "\"" + product.getProductName() + "\" has been archived and is no longer available",
+                    "PRODUCT_ARCHIVED", product.getProductId());
         }
 
         return mapToAdminDTO(product);

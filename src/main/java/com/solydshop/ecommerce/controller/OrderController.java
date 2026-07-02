@@ -34,6 +34,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/seller")
+    public ResponseEntity<List<OrderDTO>> getSellerOrders(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return ResponseEntity.ok(orderService.getSellerOrders(userDetails.getUser().getUserId()));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{orderId}/status")
     public ResponseEntity<OrderDTO> updateOrderStatus(

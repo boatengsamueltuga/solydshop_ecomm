@@ -95,6 +95,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/reviews/**").authenticated()
                         .requestMatchers("/api/seller-applications/**").authenticated()
+                        .requestMatchers("/api/seller-downgrade-requests/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
