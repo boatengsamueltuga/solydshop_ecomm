@@ -27,7 +27,7 @@ public class Product {
     private String image4Url;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'ACTIVE'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private ProductStatus status = ProductStatus.PENDING_REVIEW;
 
     @Column(columnDefinition = "TEXT")
