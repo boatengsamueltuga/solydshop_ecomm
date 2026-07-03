@@ -51,7 +51,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null) {
 
-            username = jwtUtil.extractUsername(token);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+                // Expired, malformed, or otherwise invalid token -- fall through as
+                // unauthenticated rather than letting the exception escape the filter
+                // chain. Filters run before Spring MVC's @RestControllerAdvice layer,
+                // so an uncaught exception here would never reach GlobalExceptionHandler;
+                // it would surface as a raw 500 instead of a clean "please log in again".
+            }
         }
 
         if (username != null &&
