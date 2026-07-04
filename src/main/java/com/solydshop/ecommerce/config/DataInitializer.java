@@ -6,13 +6,21 @@ import com.solydshop.ecommerce.repository.RoleRepository;
 import com.solydshop.ecommerce.repository.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Seeds roles and demo accounts (password "1234") for local development only.
+ * Excluded from the "prod" profile so production never gets a known-password
+ * admin account — create the real admin by signing up and granting ROLE_ADMIN
+ * manually (see deployment docs).
+ */
 @Component
+@Profile("!prod")
 public class DataInitializer implements ApplicationRunner {
 
     private final RoleRepository roleRepository;
