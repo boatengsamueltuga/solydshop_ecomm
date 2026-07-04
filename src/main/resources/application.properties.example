@@ -39,5 +39,12 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 # Frontend URL for password reset link
 app.frontend-url=http://localhost:3000
 
+# CORS - comma-separated list of allowed origins
+cors.allowed-origins=http://localhost:3000
+
+# Auth cookies - both must flip together for cross-site production use
+cookie.secure=false
+cookie.same-site=Lax
+
 # Copy this file to application.properties and fill in real values.
 # application.properties is git-ignored and must never be committed.
