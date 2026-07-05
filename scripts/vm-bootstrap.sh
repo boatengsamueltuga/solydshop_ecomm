@@ -22,6 +22,7 @@ sudo usermod -aG docker "$USER"
 
 # Oracle's default Ubuntu image blocks 80/443 at the iptables level in
 # addition to the Cloud console's security list - both must be opened.
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
 sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
 sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save 2>/dev/null || true
