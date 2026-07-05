@@ -36,6 +36,10 @@ spring.mail.password=your-app-password
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
+# Mail is best-effort (password reset only) - don't let a transient SMTP
+# issue mark the whole app unhealthy
+management.health.mail.enabled=false
+
 # Frontend URL for password reset link
 app.frontend-url=http://localhost:3000
 

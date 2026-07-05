@@ -34,3 +34,6 @@ build/
 # Ignore local application configuration
 src/main/resources/application.properties
 
+# Docker Compose environment (real secrets, VM-side only)
+.env
+
