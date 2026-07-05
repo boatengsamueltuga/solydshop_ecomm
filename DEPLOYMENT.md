@@ -80,9 +80,12 @@ with an authentication error.
 
 ## 7. Create the first admin account
 
-Production intentionally has no default admin account (demo-account
-seeding is dev-only). Sign up normally through the deployed app, then run
-this on the VM to promote that account:
+Roles (ROLE_USER, ROLE_ADMIN, ROLE_SELLER) are seeded automatically in
+every environment, including production, since signup and authorization
+depend on them existing. Production intentionally has no default admin
+account, since demo-account seeding (with a known password) is dev-only.
+Sign up normally through the deployed app, then run this on the VM to
+promote that account:
 
 ```bash
 docker compose exec db psql -U <DB_USERNAME> -d solydShopdb -c \
