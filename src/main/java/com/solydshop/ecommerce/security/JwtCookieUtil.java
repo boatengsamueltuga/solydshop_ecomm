@@ -1,5 +1,6 @@
 package com.solydshop.ecommerce.security;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,17 @@ public class JwtCookieUtil {
 
     @Value("${cookie.same-site:Lax}")
     private String cookieSameSite;
+
+    @PostConstruct
+    public void validateCookieConfig() {
+        if ("None".equalsIgnoreCase(cookieSameSite) && !cookieSecure) {
+            throw new IllegalStateException(
+                    "Invalid cookie configuration: cookie.same-site=None requires cookie.secure=true. "
+                            + "Browsers silently reject SameSite=None cookies that are not also Secure, "
+                            + "which would break authentication with no visible error. "
+                            + "Set COOKIE_SECURE=true or use a different COOKIE_SAME_SITE value.");
+        }
+    }
 
     public void addAccessTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("accessToken", token)

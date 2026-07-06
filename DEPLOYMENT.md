@@ -60,6 +60,12 @@ since the image itself contains no secrets — those are injected via `.env`
 at container runtime). Otherwise the VM's `docker compose pull` will fail
 with an authentication error.
 
+Every image is tagged both `:latest` and with the commit SHA, so there's
+always a rollback path. To roll back, on the VM run `docker compose pull`
+after changing the image tag in `docker-compose.yml` to a previous commit
+SHA (visible in the GHCR package's version history or GitHub Actions run
+history), or manually `docker pull ghcr.io/<owner>/solydshop-backend:<previous-sha> && docker tag ... :latest && docker compose up -d backend`.
+
 ## 5. Vercel (frontend)
 
 1. Sign up at https://vercel.com, connect the `solydshopFrontend` GitHub repo.

@@ -6,8 +6,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtCookieUtilTest {
@@ -55,5 +57,40 @@ class JwtCookieUtilTest {
         assertEquals(2, cookies.size());
         assertTrue(cookies.get(0).contains("Max-Age=0"));
         assertTrue(cookies.get(1).contains("Max-Age=0"));
+    }
+
+    @Test
+    void validateCookieConfig_throws_whenSameSiteNoneAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "None");
+
+        assertThrows(IllegalStateException.class, util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_throws_whenSameSiteNoneCaseInsensitiveAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "none");
+
+        assertThrows(IllegalStateException.class, util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteNoneAndSecure() {
+        JwtCookieUtil util = newUtil(true, "None");
+
+        assertDoesNotThrow(util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteLaxAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "Lax");
+
+        assertDoesNotThrow(util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteLaxAndSecure() {
+        JwtCookieUtil util = newUtil(true, "Lax");
+
+        assertDoesNotThrow(util::validateCookieConfig);
     }
 }
