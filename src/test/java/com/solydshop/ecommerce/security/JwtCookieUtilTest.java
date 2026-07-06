@@ -1,0 +1,96 @@
+package com.solydshop.ecommerce.security;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class JwtCookieUtilTest {
+
+    private JwtCookieUtil newUtil(boolean secure, String sameSite) {
+        JwtCookieUtil util = new JwtCookieUtil();
+        ReflectionTestUtils.setField(util, "cookieSecure", secure);
+        ReflectionTestUtils.setField(util, "cookieSameSite", sameSite);
+        return util;
+    }
+
+    @Test
+    void addAccessTokenCookie_prod_setsSecureAndSameSiteNone() {
+        JwtCookieUtil util = newUtil(true, "None");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        util.addAccessTokenCookie(response, "test-token");
+
+        String header = response.getHeader("Set-Cookie");
+        assertTrue(header.contains("Secure"));
+        assertTrue(header.contains("SameSite=None"));
+        assertTrue(header.contains("HttpOnly"));
+    }
+
+    @Test
+    void addAccessTokenCookie_localDev_defaultsToLaxAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "Lax");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        util.addAccessTokenCookie(response, "test-token");
+
+        String header = response.getHeader("Set-Cookie");
+        assertTrue(header.contains("SameSite=Lax"));
+        assertFalse(header.contains("Secure"));
+    }
+
+    @Test
+    void clearCookies_setsMaxAgeZeroForBothCookies() {
+        JwtCookieUtil util = newUtil(false, "Lax");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        util.clearCookies(response);
+
+        List<String> cookies = response.getHeaders("Set-Cookie");
+        assertEquals(2, cookies.size());
+        assertTrue(cookies.get(0).contains("Max-Age=0"));
+        assertTrue(cookies.get(1).contains("Max-Age=0"));
+    }
+
+    @Test
+    void validateCookieConfig_throws_whenSameSiteNoneAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "None");
+
+        assertThrows(IllegalStateException.class, util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_throws_whenSameSiteNoneCaseInsensitiveAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "none");
+
+        assertThrows(IllegalStateException.class, util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteNoneAndSecure() {
+        JwtCookieUtil util = newUtil(true, "None");
+
+        assertDoesNotThrow(util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteLaxAndNotSecure() {
+        JwtCookieUtil util = newUtil(false, "Lax");
+
+        assertDoesNotThrow(util::validateCookieConfig);
+    }
+
+    @Test
+    void validateCookieConfig_doesNotThrow_whenSameSiteLaxAndSecure() {
+        JwtCookieUtil util = newUtil(true, "Lax");
+
+        assertDoesNotThrow(util::validateCookieConfig);
+    }
+}

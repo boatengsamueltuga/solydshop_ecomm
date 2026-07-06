@@ -31,6 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
-# Ignore local application configuration
-src/main/resources/application.properties
+
+# Local-only secret overrides (real secrets, never committed)
+src/main/resources/application-secrets.properties
+
+# Docker Compose environment (real secrets, VM-side only)
+.env
 
