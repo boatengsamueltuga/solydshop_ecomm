@@ -5,18 +5,24 @@ changes referenced here are already in place (see
 `docs/superpowers/specs/2026-07-04-free-deployment-design.md` in the
 frontend repo for the full design).
 
-## 1. Oracle Cloud VM
+## 1. DigitalOcean Droplet
 
-1. Sign up at https://www.oracle.com/cloud/free/ (Always Free tier).
-2. Create a Compute instance: shape "Ampere A1 (VM.Standard.A1.Flex)",
-   Ubuntu 24.04, at least 1 OCPU / 6GB RAM (well within the Always Free
-   allowance of 4 OCPU / 24GB total).
-3. Under Networking, reserve a **static** public IP for the instance
-   (Oracle calls this a "Reserved Public IP") — a dynamic IP would break
-   DNS/HTTPS on every reboot.
-4. In the VM's attached Virtual Cloud Network → Security List, add ingress
-   rules for TCP ports 22, 80, and 443 from source `0.0.0.0/0`.
-5. Note the VM's public IP and download the SSH private key Oracle gives you.
+1. Sign up at https://www.digitalocean.com.
+2. Create a Droplet: Ubuntu 24.04 (LTS) x64, Basic plan, Regular (shared
+   CPU) — 2 GB RAM / 1 vCPU (~$12/mo) is a safe minimum for Postgres +
+   Spring Boot + Caddy running together; the 1 GB/$6 plan can work too if
+   you add a swap file, but expect the JVM to be tight on memory. Choose a
+   datacenter region close to your users.
+3. Add your SSH key during creation (DigitalOcean's droplet creation flow
+   installs it for you — no separate key-download step like Oracle's).
+   The droplet's public IP is static by default; no extra "reserve a
+   static IP" step is needed unless you want a Floating IP you can
+   re-point between droplets later.
+4. Under Networking → Firewalls, create a firewall (or reuse the
+   droplet's default) allowing inbound TCP 22, 80, and 443 from
+   `0.0.0.0/0`, and apply it to the droplet.
+5. Note the droplet's public IP. You log in as `root` by default (or the
+   sudo user you configured at creation).
 
 ## 2. DuckDNS
 
@@ -26,9 +32,11 @@ frontend repo for the full design).
 
 ## 3. VM bootstrap
 
-1. SSH into the VM: `ssh -i <key> ubuntu@<vm-ip>`
+1. SSH into the VM: `ssh -i <key> root@<vm-ip>` (or your configured sudo
+   user instead of `root`)
 2. Copy `scripts/vm-bootstrap.sh` to the VM and run it: `bash vm-bootstrap.sh`
-3. Log out and back in (for the `docker` group membership to apply).
+3. If you're using a non-root sudo user, log out and back in (for the
+   `docker` group membership to apply). Not needed if you're `root`.
 4. Copy `docker-compose.yml`, `Caddyfile`, and `.env.example` into
    `~/solydshop/` on the VM (`scp` from your machine, or `git clone` the
    repo there and copy the files out).
@@ -47,11 +55,11 @@ frontend repo for the full design).
 ## 4. GitHub Actions secrets (backend repo)
 
 Add these under Settings → Secrets and variables → Actions:
-- `VM_HOST` — the VM's public IP or DuckDNS hostname
-- `VM_USER` — `ubuntu`
+- `VM_HOST` — the droplet's public IP or DuckDNS hostname
+- `VM_USER` — `root` (or your configured sudo user)
 - `VM_SSH_KEY` — a **dedicated** deploy keypair's private key (don't reuse
   your personal key): generate with `ssh-keygen -t ed25519 -f deploy_key`,
-  add `deploy_key.pub` to the VM's `~/.ssh/authorized_keys`, paste the
+  add `deploy_key.pub` to the droplet's `~/.ssh/authorized_keys`, paste the
   contents of `deploy_key` (private half) as this secret.
 
 By default, GHCR packages are private — after the first push from CI, go to
@@ -100,9 +108,10 @@ docker compose exec db psql -U <DB_USERNAME> -d solydShopdb -c \
 
 ## 8. Backups
 
-On the VM: `crontab -e` and add:
+On the VM: `crontab -e` and add, substituting your actual home directory
+(e.g. `/root` if logged in as root, `/home/<user>` otherwise):
 ```
-0 3 * * * bash /home/ubuntu/solydshop/scripts/backup-db.sh >> /home/ubuntu/solydshop/backups/backup.log 2>&1
+0 3 * * * bash /root/solydshop/scripts/backup-db.sh >> /root/solydshop/backups/backup.log 2>&1
 ```
 This keeps the last 7 days of `pg_dump` backups in `~/solydshop/backups/`,
 local to the VM (see the design spec's "known gap" note on off-VM
