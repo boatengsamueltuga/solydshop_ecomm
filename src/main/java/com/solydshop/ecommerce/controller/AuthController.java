@@ -409,6 +409,18 @@ public class AuthController {
         return ip;
     }
 
+    // Cross-domain deployments (frontend and backend on different registrable
+    // domains) can't read the XSRF-TOKEN cookie via JS - cookies are scoped
+    // per-domain regardless of SameSite/Secure. Expose the token value in the
+    // response body instead so the frontend can echo it back as a header.
+    @GetMapping("/csrf")
+    public ResponseEntity<?> getCsrfToken(org.springframework.security.web.csrf.CsrfToken csrfToken) {
+        return ResponseEntity.ok(java.util.Map.of(
+                "headerName", csrfToken.getHeaderName(),
+                "token", csrfToken.getToken()
+        ));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
             Authentication authentication
