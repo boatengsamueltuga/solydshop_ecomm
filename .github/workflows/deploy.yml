@@ -11,6 +11,20 @@ permissions:
 jobs:
   test-build-push:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: solydShopdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -20,6 +34,14 @@ jobs:
           distribution: 'temurin'
 
       - name: Run tests
+        env:
+          DB_PASSWORD: postgres
+          JWT_SECRET: ci-test-secret-not-used-in-production
+          CLOUDINARY_API_KEY: ci-dummy
+          CLOUDINARY_API_SECRET: ci-dummy
+          STRIPE_SECRET_KEY: sk_test_ci_dummy
+          MAIL_USERNAME: ci@example.com
+          MAIL_PASSWORD: ci-dummy
         run: ./mvnw test -B
 
       - uses: docker/setup-buildx-action@v3
