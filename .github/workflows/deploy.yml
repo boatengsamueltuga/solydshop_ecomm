@@ -40,6 +40,7 @@ jobs:
           CLOUDINARY_API_KEY: ci-dummy
           CLOUDINARY_API_SECRET: ci-dummy
           STRIPE_SECRET_KEY: sk_test_ci_dummy
+          STRIPE_WEBHOOK_SECRET: whsec_ci_dummy
           MAIL_USERNAME: ci@example.com
           MAIL_PASSWORD: ci-dummy
         run: ./mvnw test -B
