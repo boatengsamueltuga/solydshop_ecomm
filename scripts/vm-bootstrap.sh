@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# One-time setup for a fresh Oracle Cloud Ubuntu VM. Run as: bash vm-bootstrap.sh
+# One-time setup for a fresh DigitalOcean Ubuntu droplet. Run as: bash vm-bootstrap.sh
 
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl gnupg
@@ -20,12 +20,10 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plu
 
 sudo usermod -aG docker "$USER"
 
-# Oracle's default Ubuntu image blocks 80/443 at the iptables level in
-# addition to the Cloud console's security list - both must be opened.
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
-sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-sudo netfilter-persistent save 2>/dev/null || true
+# DigitalOcean droplets don't block 80/443 at the iptables level the way
+# Oracle's default image did - just make sure inbound 22/80/443 are
+# allowed in a DigitalOcean Cloud Firewall attached to the droplet (or in
+# ufw, if you're using it instead).
 
 mkdir -p ~/solydshop
 
