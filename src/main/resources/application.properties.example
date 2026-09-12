@@ -50,5 +50,9 @@ cors.allowed-origins=http://localhost:3000
 cookie.secure=false
 cookie.same-site=Lax
 
+# Notification service (extracted microservice) - internal-only, cluster-local URL
+notification.service.url=http://localhost:8081
+internal.api-key=replace-with-a-long-random-string
+
 # Copy this file to application.properties and fill in real values.
 # application.properties is git-ignored and must never be committed.
