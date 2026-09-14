@@ -3,3 +3,10 @@ target/
 .git/
 *.md
 .mvn/wrapper/maven-wrapper.jar
+
+# Local-only secrets - must never end up in a built image (see .gitignore)
+src/main/resources/application-secrets.properties
+.env
+k8s/secret.yaml
+k8s/kubeconfig.yaml
+k8s/rabbitmq-secret.yaml

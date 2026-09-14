@@ -41,4 +41,5 @@ src/main/resources/application-secrets.properties
 # k3s learning deployment (real secrets, local-only)
 k8s/secret.yaml
 k8s/kubeconfig.yaml
+k8s/rabbitmq-secret.yaml
 

@@ -3,8 +3,10 @@ kind: ConfigMap
 metadata:
   name: solydshop-config
 data:
-  DB_URL: "jdbc:postgresql://45.55.78.201:5432/solydShopdb"
+  DB_URL: "jdbc:postgresql://45.55.78.201:5432/solydShopdb?sslmode=disable"
   NOTIFICATION_SERVICE_URL: "http://solydshop-notifications:8081"
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"
   CLOUDINARY_CLOUD_NAME: "dummy-cloud"
   STRIPE_PUBLISHABLE_KEY: "pk_test_dummy"
   JWT_EXPIRATION: "3600000"

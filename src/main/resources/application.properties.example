@@ -54,5 +54,13 @@ cookie.same-site=Lax
 notification.service.url=http://localhost:8081
 internal.api-key=replace-with-a-long-random-string
 
+# RabbitMQ (notification creation events published here, consumed by solydshop-notifications)
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+notifications.rabbitmq.exchange=notifications.exchange
+notifications.rabbitmq.routing-key=notification.created
+
 # Copy this file to application.properties and fill in real values.
 # application.properties is git-ignored and must never be committed.
